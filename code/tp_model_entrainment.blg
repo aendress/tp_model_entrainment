@@ -1,0 +1,52 @@
+This is BibTeX, Version 0.99d (TeX Live 2021)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: tp_model_entrainment.aux
+The style file: plainnat.bst
+Database file #1: ../misc/ansgar.bib
+Reallocated buffer (elt_size=1) to 40000 items from 20000.
+Reallocated sv_buffer (elt_size=1) to 40000 items from 20000.
+Reallocated ex_buf (elt_size=1) to 40000 items from 20000.
+Reallocated out_buf (elt_size=1) to 40000 items from 20000.
+Reallocated name_tok (elt_size=4) to 40000 items from 20000.
+Reallocated name_sep_char (elt_size=1) to 40000 items from 20000.
+You've used 74 entries,
+            2773 wiz_defined-function locations,
+            1180 strings with 20906 characters,
+and the built_in function-call counts, 36681 in all, are:
+= -- 3449
+> -- 2056
+< -- 38
++ -- 694
+- -- 618
+* -- 3219
+:= -- 5711
+add.period$ -- 298
+call.type$ -- 74
+change.case$ -- 428
+chr.to.int$ -- 72
+cite$ -- 148
+duplicate$ -- 1518
+empty$ -- 2912
+format.name$ -- 746
+if$ -- 7626
+int.to.chr$ -- 3
+int.to.str$ -- 1
+missing$ -- 74
+newline$ -- 455
+num.names$ -- 296
+pop$ -- 648
+preamble$ -- 2
+purify$ -- 354
+quote$ -- 0
+skip$ -- 1144
+stack$ -- 0
+substring$ -- 1735
+swap$ -- 89
+text.length$ -- 1
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 814
+warning$ -- 0
+while$ -- 338
+width$ -- 0
+write$ -- 1120

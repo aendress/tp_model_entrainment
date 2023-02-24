@@ -1,0 +1,553 @@
+\providecommand{\noopsort}[1]{}
+\begin{thebibliography}{74}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Aslin et~al.(1998)Aslin, Saffran, and Newport]{Aslin1998}
+Richard~N Aslin, Jenny~R Saffran, and Elissa~L Newport.
+\newblock Computation of conditional probability statistics by 8-month-old
+  infants.
+\newblock \emph{Psychol Sci}, 9:\penalty0 321--324, 1998.
+
+\bibitem[Batterink and Paller(2017)]{Batterink2017}
+Laura~J. Batterink and Ken~A. Paller.
+\newblock Online neural monitoring of statistical learning.
+\newblock \emph{Cortex; a journal devoted to the study of the nervous system
+  and behavior}, 90:\penalty0 31--45, May 2017.
+\newblock ISSN 1973-8102.
+\newblock \doi{10.1016/j.cortex.2017.02.004}.
+
+\bibitem[Bays et~al.(2010)Bays, Singh-Curry, Gorgoraptis, Driver, and
+  Husain]{Bays2010}
+Paul~M Bays, Victoria Singh-Curry, Nikos Gorgoraptis, Jon Driver, and Masud
+  Husain.
+\newblock Integration of goal- and stimulus-related visual signals revealed by
+  damage to human parietal cortex.
+\newblock \emph{J Neurosci}, 30:\penalty0 5968--5978, 2010.
+\newblock \doi{10.1523/JNEUROSCI.0997-10.2010}.
+
+\bibitem[Brentari et~al.(2011)Brentari, Gonz\'alez, Seidl, and
+  Wilbur]{Brentari2011}
+Diane Brentari, Carolina Gonz\'alez, Amanda Seidl, and Ronnie Wilbur.
+\newblock Sensitivity to visual prosodic cues in signers and nonsigners.
+\newblock \emph{Lang Speech}, 54\penalty0 (1):\penalty0 49--72, 2011.
+
+\bibitem[Buiatti et~al.(2009)Buiatti, Pe{\~{n}}a, and
+  Dehaene-Lambertz]{Buiatti2009}
+Marco Buiatti, Marcela Pe{\~{n}}a, and Ghislaine Dehaene-Lambertz.
+\newblock Investigating the neural correlates of continuous speech computation
+  with frequency-tagged neuroelectric responses.
+\newblock \emph{Neuroimage}, 44\penalty0 (2):\penalty0 509--519, 2009.
+\newblock \doi{10.1016/j.neuroimage.2008.09.015}.
+
+\bibitem[Chen and {Ten Cate}(2015)]{Chen2015}
+Jiani Chen and Carel {Ten Cate}.
+\newblock Zebra finches can use positional and transitional cues to distinguish
+  vocal element strings.
+\newblock \emph{Behav Processes}, 117:\penalty0 29--34, 2015.
+\newblock \doi{10.1016/j.beproc.2014.09.004}.
+
+\bibitem[Christiansen(2018)]{Christiansen2018}
+Morten~H. Christiansen.
+\newblock Implicit statistical learning: A tale of two literatures.
+\newblock \emph{Topics in Cognitive Science}, 11\penalty0 (3):\penalty0
+  468--481, 2018.
+\newblock \doi{10.1111/tops.12332}.
+
+\bibitem[Christophe et~al.(2001)Christophe, Mehler, and
+  Sebastian-Galles]{Christophe2001}
+Anne Christophe, Jacques Mehler, and Nuria Sebastian-Galles.
+\newblock Perception of prosodic boundary correlates by newborn infants.
+\newblock \emph{Infancy}, 2\penalty0 (3):\penalty0 385--394, 2001.
+
+\bibitem[Clark(2013)]{Clark2013}
+Andy Clark.
+\newblock Whatever next? predictive brains, situated agents, and the future of
+  cognitive science.
+\newblock \emph{Behavioral and Brain Sciences}, 36\penalty0 (3):\penalty0
+  181--204, 2013.
+\newblock \doi{10.1017/s0140525x12000477}.
+
+\bibitem[Cohen and Squire(1980)]{Cohen1980}
+N.~Cohen and L.~Squire.
+\newblock Preserved learning and retention of pattern-analyzing skill in
+  amnesia: dissociation of knowing how and knowing that.
+\newblock \emph{Science}, 210\penalty0 (4466):\penalty0 207--210, 1980.
+\newblock \doi{10.1126/science.7414331}.
+
+\bibitem[Creel et~al.(2004)Creel, Newport, and Aslin]{Creel2004}
+Sarah~C Creel, Elissa~L Newport, and Richard~N Aslin.
+\newblock Distant melodies: {S}tatistical learning of nonadjacent dependencies
+  in tone sequences.
+\newblock \emph{J Exp Psychol Learn Mem Cogn}, 30\penalty0 (5):\penalty0
+  1119--30, 2004.
+\newblock \doi{10.1037/0278-7393.30.5.1119}.
+
+\bibitem[Endress(2010)]{Endress-tone-tps}
+Ansgar~D. Endress.
+\newblock Learning melodies from non-adjacent tones.
+\newblock \emph{Acta Psychologica}, 135\penalty0 (2):\penalty0 182--190, 2010.
+\newblock \doi{10.1016/j.actpsy.2010.06.005}.
+
+\bibitem[Endress and de~Seyssel(under review)]{Endress-stat-recall}
+Ansgar~D. Endress and Maureen de~Seyssel.
+\newblock The specificity of sequential statistical learning: Statistical
+  learning accumulates predictive information from unstructured input but is
+  dissociable from (declarative) memory.
+\newblock \emph{JEPG:G}, under review.
+
+\bibitem[Endress and Hauser(2010)]{Endress-cross-seg}
+Ansgar~D. Endress and Marc~D. Hauser.
+\newblock Word segmentation with universal prosodic cues.
+\newblock \emph{Cognit Psychol}, 61\penalty0 (2):\penalty0 177--199, 2010.
+\newblock \doi{10.1016/j.cogpsych.2010.05.001}.
+
+\bibitem[Endress and Johnson(2021)]{Endress-TP-Model}
+Ansgar~D Endress and S~P Johnson.
+\newblock When forgetting fosters learning: A neural network model for
+  statistical learning.
+\newblock \emph{Cognition}, 104621, 2021.
+\newblock \doi{10.1016/j.cognition.2021.104621}.
+
+\bibitem[Endress and Langus(2017)]{Endress-Phantoms-Vision}
+Ansgar~D. Endress and A~Langus.
+\newblock Transitional probabilities count more than frequency, but might not
+  be used for memorization.
+\newblock \emph{Cognitive Psychology}, 92:\penalty0 37--64, 2017.
+\newblock \doi{10.1016/j.cogpsych.2016.11.004}.
+
+\bibitem[Endress and Mehler(2009)]{Endress-Phantoms}
+Ansgar~D. Endress and Jacques Mehler.
+\newblock The surprising power of statistical learning: When fragment knowledge
+  leads to false memories of unheard words.
+\newblock \emph{Journal of Memory and Language}, 60\penalty0 (3):\penalty0
+  351--367, 2009.
+\newblock \doi{10.1016/j.jml.2008.10.003}.
+
+\bibitem[Endress and Szab\'o(2020)]{Endress-Catastrophic-Interference}
+Ansgar~D. Endress and S.~Szab\'o.
+\newblock Sequential presentation protects memory from catastrophic
+  interference.
+\newblock \emph{Cognit Sci}, 44\penalty0 (5), 2020.
+\newblock \doi{10.1111/cogs.12828}.
+
+\bibitem[Endress and Wood(2011)]{Endress-Action-Axc}
+Ansgar~D. Endress and Justin~N Wood.
+\newblock From movements to actions: Two mechanisms for learning action
+  sequences.
+\newblock \emph{Cognit Psychol}, 63\penalty0 (3):\penalty0 141--171, 2011.
+\newblock \doi{10.1016/j.cogpsych.2011.07.001}.
+
+\bibitem[Endress et~al.(2020)Endress, Slone, and Johnson]{Endress2020}
+Ansgar~D. Endress, Lauren~K. Slone, and Scott~P. Johnson.
+\newblock Statistical learning and memory.
+\newblock \emph{Cognition}, 204:\penalty0 104346, 2020.
+\newblock ISSN 1873-7838.
+\newblock \doi{10.1016/j.cognition.2020.104346}.
+
+\bibitem[Erickson et~al.(2014)Erickson, Thiessen, and Estes]{Erickson2014}
+Lucy~C. Erickson, Erik~D. Thiessen, and Katharine~Graf Estes.
+\newblock Statistically coherent labels facilitate categorization in
+  8-month-olds.
+\newblock \emph{Journal of Memory and Language}, 72:\penalty0 49--58, 2014.
+\newblock \doi{10.1016/j.jml.2014.01.002}.
+
+\bibitem[Finn et~al.(2016)Finn, Kalra, Goetz, Leonard, Sheridan, and
+  Gabrieli]{Finn2016}
+Amy~S. Finn, Priya~B. Kalra, Calvin Goetz, Julia~A. Leonard, Margaret~A.
+  Sheridan, and John~D.E. Gabrieli.
+\newblock Developmental dissociation between the maturation of procedural
+  memory and declarative memory.
+\newblock \emph{Journal of Experimental Child Psychology}, 142:\penalty0
+  212--220, 2016.
+\newblock \doi{10.1016/j.jecp.2015.09.027}.
+
+\bibitem[Fiser and Aslin(2002{\natexlab{a}})]{Fiser2002}
+J\'ozsef Fiser and Richard~N Aslin.
+\newblock Statistical learning of new visual feature combinations by infants.
+\newblock \emph{Proc Natl Acad Sci U S A}, 99\penalty0 (24):\penalty0 15822--6,
+  2002{\natexlab{a}}.
+\newblock \doi{10.1073/pnas.232472899}.
+
+\bibitem[Fiser and Aslin(2002{\natexlab{b}})]{Fiser2002a}
+J\'ozsef Fiser and Richard~N Aslin.
+\newblock Statistical learning of higher-order temporal structure from visual
+  shape sequences.
+\newblock \emph{J Exp Psychol Learn Mem Cogn}, 28\penalty0 (3):\penalty0
+  458--67, 2002{\natexlab{b}}.
+
+\bibitem[Fiser and Aslin(2005)]{Fiser2005}
+J\'ozsef Fiser and Richard~N Aslin.
+\newblock Encoding multielement scenes: statistical learning of visual feature
+  hierarchies.
+\newblock \emph{J Exp Psychol Gen}, 134\penalty0 (4):\penalty0 521--37, 2005.
+\newblock \doi{10.1037/0096-3445.134.4.521}.
+
+\bibitem[Fl\'{o} et~al.(2022)Fl\'{o}, Benjamin, Palu, and
+  Dehaene-Lambertz]{Flo2022}
+Ana Fl\'{o}, Lucas Benjamin, Marie Palu, and Ghislaine Dehaene-Lambertz.
+\newblock Sleeping neonates track transitional probabilities in speech but only
+  retain the first syllable of words.
+\newblock \emph{Scientific reports}, 12:\penalty0 4391, March 2022.
+\newblock ISSN 2045-2322.
+\newblock \doi{25865749}.
+
+\bibitem[Friston(2010)]{Friston2010}
+Karl Friston.
+\newblock The free-energy principle: a unified brain theory?
+\newblock \emph{Nature Reviews Neuroscience}, 11\penalty0 (2):\penalty0
+  127--138, 2010.
+\newblock \doi{10.1038/nrn2787}.
+
+\bibitem[Gallistel and Gibbon(2000)]{Gallistel2000PsychRev}
+C.~R. Gallistel and J~Gibbon.
+\newblock Time, rate, and conditioning.
+\newblock \emph{Psychol Rev}, 107\penalty0 (2):\penalty0 289--344, 2000.
+
+\bibitem[Gallistel et~al.(2001)Gallistel, Mark, King, and
+  Latham]{Gallistel2001b}
+C.~R. Gallistel, T~A Mark, A~P King, and P~E Latham.
+\newblock The rat approximates an ideal detector of changes in rates of reward:
+  implications for the law of effect.
+\newblock \emph{Journal of experimental psychology. Animal behavior processes},
+  27:\penalty0 354--372, 2001.
+\newblock ISSN 0097-7403.
+
+\bibitem[Gillette et~al.(1999)Gillette, Gleitman, Gleitman, and
+  Lederer]{Gillette1999}
+J~Gillette, Henry Gleitman, Lila~R Gleitman, and A~Lederer.
+\newblock Human simulations of vocabulary learning.
+\newblock \emph{Cognition}, 73\penalty0 (2):\penalty0 135--76, 1999.
+
+\bibitem[Glicksohn and Cohen(2011)]{Glicksohn2011}
+Arit Glicksohn and Asher Cohen.
+\newblock The role of gestalt grouping principles in visual statistical
+  learning.
+\newblock \emph{Atten Percept Psychophys}, 73\penalty0 (3):\penalty0 708--713,
+  2011.
+\newblock \doi{10.3758/s13414-010-0084-4}.
+
+\bibitem[Gottlieb(2007)]{Gottlieb2007}
+Jacqueline Gottlieb.
+\newblock From thought to action: the parietal cortex as a bridge between
+  perception, action, and cognition.
+\newblock \emph{Neuron}, 53:\penalty0 9--16, 2007.
+\newblock ISSN 0896-6273.
+
+\bibitem[Graf and Mandler(1984)]{Graf1984}
+Peter Graf and George Mandler.
+\newblock Activation makes words more accessible, but not necessarily more
+  retrievable.
+\newblock \emph{Journal of Verbal Learning and Verbal Behavior}, 23\penalty0
+  (5):\penalty0 553--568, 1984.
+\newblock \doi{10.1016/s0022-5371(84)90346-3}.
+
+\bibitem[Graf-Estes et~al.(2007)Graf-Estes, Evans, Alibali, and
+  Saffran]{Estes2007}
+Katharine Graf-Estes, Julia~L Evans, Martha~W Alibali, and Jenny~R Saffran.
+\newblock Can infants map meaning to newly segmented words? {S}tatistical
+  segmentation and word learning.
+\newblock \emph{Psychol Sci}, 18\penalty0 (3):\penalty0 254--60, 2007.
+\newblock \doi{10.1111/j.1467-9280.2007.01885.x}.
+
+\bibitem[Hauser et~al.(2001)Hauser, Newport, and Aslin]{Hauser2001}
+Marc~D Hauser, Elissa~L Newport, and Richard~N Aslin.
+\newblock Segmentation of the speech stream in a non-human primate:
+  {S}tatistical learning in cotton-top tamarins.
+\newblock \emph{Cognition}, 78\penalty0 (3):\penalty0 B53--64, 2001.
+
+\bibitem[Hay et~al.(2011)Hay, Pelucchi, {Graf Estes}, and Saffran]{Hay2011a}
+Jessica~F. Hay, Bruna Pelucchi, Katharine {Graf Estes}, and Jenny~R. Saffran.
+\newblock Linking sounds to meanings: infant statistical learning in a natural
+  language.
+\newblock \emph{Cogn Psychol}, 63\penalty0 (2):\penalty0 93--106, 2011.
+\newblock \doi{10.1016/j.cogpsych.2011.06.002}.
+
+\bibitem[Isbilen et~al.(2020)Isbilen, McCauley, Kidd, and
+  Christiansen]{Isbilen2020}
+Erin~S. Isbilen, Stewart~M. McCauley, Evan Kidd, and Morten~H. Christiansen.
+\newblock Statistically induced chunking recall: A memory-based approach to
+  statistical learning.
+\newblock \emph{Cognitive science}, 44:\penalty0 e12848, 2020.
+\newblock ISSN 1551-6709.
+\newblock \doi{10.1111/cogs.12848}.
+
+\bibitem[Johnson and Jusczyk(2001)]{Johnson2001a}
+Elizabeth~K Johnson and Peter~W. Jusczyk.
+\newblock Word segmentation by 8-month-olds: When speech cues count more than
+  statistics.
+\newblock \emph{J Mem Lang}, 44\penalty0 (4):\penalty0 548--567, 2001.
+
+\bibitem[Johnson and Seidl(2009)]{Johnson2009}
+Elizabeth~K Johnson and Amanda~H Seidl.
+\newblock At 11 months, prosody still outranks statistics.
+\newblock \emph{Dev Sci}, 12\penalty0 (1):\penalty0 131--41, 2009.
+\newblock \doi{10.1111/j.1467-7687.2008.00740.x}.
+
+\bibitem[Jones and Pashler(2007)]{Jones2007}
+Jason Jones and Harold Pashler.
+\newblock Is the mind inherently forward looking? comparing prediction and
+  retrodiction.
+\newblock \emph{Psychonomic {B}ulletin \& {R}eview}, 14:\penalty0 295--300,
+  2007.
+\newblock ISSN 1069-9384.
+\newblock \doi{10.3758/bf03194067}.
+
+\bibitem[Kabdebon et~al.(2015)Kabdebon, Pena, Buiatti, and
+  Dehaene-Lambertz]{Kabdebon2015}
+C.~Kabdebon, M.~Pena, M.~Buiatti, and G.~Dehaene-Lambertz.
+\newblock Electrophysiological evidence of statistical learning of
+  long-distance dependencies in 8-month-old preterm and full-term infants.
+\newblock \emph{Brain and language}, 148:\penalty0 25--36, September 2015.
+\newblock ISSN 1090-2155.
+\newblock \doi{10.1016/j.bandl.2015.03.005}.
+
+\bibitem[Karaman and Hay(2018)]{Karaman2018}
+Ferhat Karaman and Jessica~F. Hay.
+\newblock The longevity of statistical learning: When infant memory decays,
+  isolated words come to the rescue.
+\newblock \emph{J. Exp. Psychol. Learn. Mem. Cogn.}, 44\penalty0 (2):\penalty0
+  221--232, 2018.
+\newblock \doi{10.1037/xlm0000448}.
+
+\bibitem[Keller and Mrsic-Flogel(2018)]{Keller2018}
+Georg~B. Keller and Thomas~D. Mrsic-Flogel.
+\newblock Predictive processing: A canonical cortical computation.
+\newblock \emph{Neuron}, 100\penalty0 (2):\penalty0 424--435, 2018.
+\newblock \doi{10.1016/j.neuron.2018.10.003}.
+
+\bibitem[Kirkham et~al.(2002)Kirkham, Slemmer, and Johnson]{Kirkham2002}
+Natasha~Z Kirkham, Jonathan~A Slemmer, and Scott~P Johnson.
+\newblock Visual statistical learning in infancy: evidence for a domain general
+  learning mechanism.
+\newblock \emph{Cognition}, 83\penalty0 (2):\penalty0 B35--B42, 2002.
+\newblock \doi{10.1016/s0010-0277(02)00004-5}.
+
+\bibitem[Knowlton et~al.(1996)Knowlton, Mangels, and Squire]{Knowlton1996a}
+B~J Knowlton, J~A Mangels, and L~R Squire.
+\newblock A neostriatal habit learning system in humans.
+\newblock \emph{Science}, 273:\penalty0 1399--1402, 1996.
+\newblock ISSN 0036-8075.
+
+\bibitem[Letzkus et~al.(2011)Letzkus, Wolff, Meyer, Tovote, Courtin, Herry, and
+  L\"uthi]{Letzkus2011}
+Johannes~J Letzkus, Steffen B~E Wolff, Elisabeth M~M Meyer, Philip Tovote,
+  Julien Courtin, Cyril Herry, and Andreas L\"uthi.
+\newblock A disinhibitory microcircuit for associative fear learning in the
+  auditory cortex.
+\newblock \emph{Nature}, 480:\penalty0 331--335, 2011.
+\newblock ISSN 1476-4687.
+\newblock \doi{10.1038/nature10674}.
+
+\bibitem[Levy(2008)]{Levy2008}
+Roger Levy.
+\newblock Expectation-based syntactic comprehension.
+\newblock \emph{Cognition}, 106\penalty0 (3):\penalty0 1126--1177, 2008.
+\newblock \doi{10.1016/j.cognition.2007.05.006}.
+
+\bibitem[Medina et~al.(2011)Medina, Snedeker, Trueswell, and
+  Gleitman]{Medina2011}
+Tamara~Nicol Medina, Jesse Snedeker, John~C. Trueswell, and Lila~R. Gleitman.
+\newblock How words can and cannot be learned by observation.
+\newblock \emph{Proc Natl Acad Sci U S A}, 108\penalty0 (22):\penalty0
+  9014--9019, 2011.
+\newblock \doi{10.1073/pnas.1105040108}.
+
+\bibitem[Morgan et~al.(2019)Morgan, Fogel, Nair, and Patel]{Morgan2019}
+Emily Morgan, Allison Fogel, Anjali Nair, and Aniruddh~D Patel.
+\newblock Statistical learning and gestalt-like principles predict melodic
+  expectations.
+\newblock \emph{Cognition}, 189:\penalty0 23--34, 2019.
+\newblock ISSN 1873-7838.
+\newblock \doi{10.1016/j.cognition.2018.12.015}.
+
+\bibitem[Moser et~al.(2021)Moser, Batterink, Li~Hegner, Schleger, Braun,
+  Paller, and Preissl]{Moser2021}
+Julia Moser, Laura Batterink, Yiwen Li~Hegner, Franziska Schleger, Christoph
+  Braun, Ken~A. Paller, and Hubert Preissl.
+\newblock Dynamics of nonlinguistic statistical learning: From neural
+  entrainment to the emergence of explicit knowledge.
+\newblock \emph{NeuroImage}, 240:\penalty0 118378, October 2021.
+\newblock ISSN 1095-9572.
+\newblock \doi{10.1016/j.neuroimage.2021.118378}.
+
+\bibitem[Perruchet(2019)]{Perruchet2019}
+Pierre Perruchet.
+\newblock What mechanisms underlie implicit statistical learning? transitional
+  probabilities versus chunks in language learning.
+\newblock \emph{Topics in cognitive science}, 11:\penalty0 520--535, July 2019.
+\newblock ISSN 1756-8765.
+\newblock \doi{10.1111/tops.12403}.
+
+\bibitem[Perruchet and Pacton(2006)]{Perruchet2006}
+Pierre Perruchet and Sebastien Pacton.
+\newblock Implicit learning and statistical learning: one phenomenon, two
+  approaches.
+\newblock \emph{Trends in cognitive sciences}, 10:\penalty0 233--238, 2006.
+\newblock ISSN 1364-6613.
+\newblock \doi{10.1016/j.tics.2006.03.006}.
+
+\bibitem[Pilon(1981)]{Pilon1981}
+Robert Pilon.
+\newblock Segmentation of speech in a foreign language.
+\newblock \emph{J. Psycholinguist. Res.}, 10\penalty0 (2):\penalty0 113 -- 122,
+  1981.
+\newblock ISSN 0090-6905.
+
+\bibitem[Poldrack et~al.(2001)Poldrack, Clark, Par\'e-Blagoev, Shohamy,
+  Creso~Moyano, Myers, and Gluck]{Poldrack2001}
+R~A Poldrack, J~Clark, E~J Par\'e-Blagoev, D~Shohamy, J~Creso~Moyano, C~Myers,
+  and M~A Gluck.
+\newblock Interactive memory systems in the human brain.
+\newblock \emph{Nature}, 414:\penalty0 546--550, 2001.
+\newblock ISSN 0028-0836.
+\newblock \doi{10.1038/35107080}.
+
+\bibitem[Robertson(2022)]{Robertson2022}
+Edwin~M. Robertson.
+\newblock Memory leaks: information shared across memory systems.
+\newblock \emph{Trends in cognitive sciences}, 26:\penalty0 544--554, 2022.
+\newblock \doi{10.1016/j.tics.2022.03.010}.
+
+\bibitem[Roggeman et~al.(2010)Roggeman, Fias, and Verguts]{Roggeman2010}
+Chantal Roggeman, Wim Fias, and Tom Verguts.
+\newblock Salience maps in parietal cortex: imaging and computational modeling.
+\newblock \emph{NeuroImage}, 52:\penalty0 1005--1014, 2010.
+\newblock ISSN 1095-9572.
+\newblock \doi{10.1016/j.neuroimage.2010.01.060}.
+
+\bibitem[Saffran and Griepentrog(2001)]{Saffran2001}
+Jenny~R. Saffran and G.~J. Griepentrog.
+\newblock Absolute pitch in infant auditory learning: evidence for
+  developmental reorganization.
+\newblock \emph{Dev Psychol}, 37\penalty0 (1):\penalty0 74--85, 2001.
+
+\bibitem[Saffran et~al.(1996{\natexlab{a}})Saffran, Aslin, and
+  Newport]{Saffran-Science}
+Jenny~R Saffran, Richard~N Aslin, and Elissa~L Newport.
+\newblock Statistical learning by 8-month-old infants.
+\newblock \emph{Science}, 274\penalty0 (5294):\penalty0 1926--8,
+  1996{\natexlab{a}}.
+
+\bibitem[Saffran et~al.(1996{\natexlab{b}})Saffran, Newport, and
+  Aslin]{Saffran1996b}
+Jenny~R. Saffran, Elissa~L Newport, and Richard~N Aslin.
+\newblock Word segmentation: {T}he role of distributional cues.
+\newblock \emph{J Mem Lang}, 35:\penalty0 606--21, 1996{\natexlab{b}}.
+
+\bibitem[Saffran et~al.(1999)Saffran, Johnson, Aslin, and Newport]{Saffran1999}
+Jenny~R Saffran, EK~Johnson, Richard~N Aslin, and Elissa~L Newport.
+\newblock Statistical learning of tone sequences by human infants and adults.
+\newblock \emph{Cognition}, 70\penalty0 (1):\penalty0 27--52, 1999.
+
+\bibitem[Sengupta et~al.(2014)Sengupta, Surampudi, and Melcher]{Sengupta2014}
+Rakesh Sengupta, Bapi~Raju Surampudi, and David Melcher.
+\newblock A visual sense of number emerges from the dynamics of a recurrent
+  on-center off-surround neural network.
+\newblock \emph{Brain Res}, 1582:\penalty0 114--124, 2014.
+\newblock \doi{10.1016/j.brainres.2014.03.014}.
+
+\bibitem[Sherman and Turk-Browne(2020)]{Sherman2020}
+Brynn~E. Sherman and Nicholas~B. Turk-Browne.
+\newblock Statistical prediction of the future impairs episodic encoding of the
+  present.
+\newblock \emph{Proceedings of the National Academy of Sciences of the United
+  States of America}, 117:\penalty0 22760--22770, 2020.
+\newblock ISSN 1091-6490.
+\newblock \doi{10.1073/pnas.2013291117}.
+
+\bibitem[Shoaib et~al.(2018)Shoaib, Wang, Hay, and Lany]{Shoaib2018}
+Amber Shoaib, Tianlin Wang, Jessica~F. Hay, and Jill Lany.
+\newblock Do infants learn words from statistics? evidence from
+  english-learning infants hearing italian.
+\newblock \emph{Cognitive Science}, 42\penalty0 (8):\penalty0 3083--3099, 2018.
+\newblock \doi{10.1111/cogs.12673}.
+
+\bibitem[Shukla et~al.(2007)Shukla, Nespor, and Mehler]{Shukla2007}
+Mohinish Shukla, Marina Nespor, and Jacques Mehler.
+\newblock An interaction between prosody and statistics in the segmentation of
+  fluent speech.
+\newblock \emph{Cognit Psychol}, 54\penalty0 (1):\penalty0 1--32, 2007.
+\newblock \doi{10.1016/j.cogpsych.2006.04.002}.
+
+\bibitem[Shukla et~al.(2011)Shukla, White, and Aslin]{Shukla2011}
+Mohinish Shukla, Katherine~S White, and Richard~N Aslin.
+\newblock Prosody guides the rapid mapping of auditory word forms onto visual
+  objects in 6-mo-old infants.
+\newblock \emph{Proc Natl Acad Sci U S A}, 108\penalty0 (15):\penalty0
+  6038--6043, 2011.
+\newblock \doi{10.1073/pnas.1017617108}.
+
+\bibitem[Sohail and Johnson(2016)]{Sohail2016}
+Juwairia Sohail and Elizabeth~K. Johnson.
+\newblock How transitional probabilities and the edge effect contribute to
+  listeners' phonological bootstrapping success.
+\newblock \emph{Language Learning and Development}, pages 1--11, 2016.
+\newblock \doi{10.1080/15475441.2015.1073153}.
+
+\bibitem[Squire(1992)]{Squire1992}
+Larry~R. Squire.
+\newblock Memory and the hippocampus: A synthesis from findings with rats,
+  monkeys, and humans.
+\newblock \emph{Psychological Review}, 99\penalty0 (2):\penalty0 195--231,
+  1992.
+\newblock \doi{10.1037/0033-295x.99.2.195}.
+
+\bibitem[Theeuwes et~al.(2022)Theeuwes, Bogaerts, and van
+  Moorselaar]{Theeuwes2022}
+Jan Theeuwes, Louisa Bogaerts, and Dirk van Moorselaar.
+\newblock What to expect where and when: how statistical learning drives visual
+  selection.
+\newblock \emph{Trends in cognitive sciences}, July 2022.
+\newblock ISSN 1879-307X.
+\newblock \doi{10.1016/j.tics.2022.06.001}.
+
+\bibitem[Toro et~al.(2005)Toro, Trobalon, and
+  Sebasti\'an-Gall\'es]{Toro2005-backward}
+Juan~M Toro, Josep~B Trobalon, and N\'uria Sebasti\'an-Gall\'es.
+\newblock Effects of backward speech and speaker variability in language
+  discrimination by rats.
+\newblock \emph{J Exp Psychol Anim Behav Process}, 31\penalty0 (1):\penalty0
+  95--100, 2005.
+\newblock \doi{10.1037/0097-7403.31.1.95}.
+
+\bibitem[Trueswell et~al.(1999)Trueswell, Sekerina, Hill, and
+  Logrip]{Trueswell1999}
+J.~C. Trueswell, I.~Sekerina, N.~M. Hill, and M.~L. Logrip.
+\newblock The kindergarten-path effect: studying on-line sentence processing in
+  young children.
+\newblock \emph{Cognition}, 73\penalty0 (2):\penalty0 89--134, 1999.
+
+\bibitem[Turk-Browne and Scholl(2009)]{Turk-Browne-reversal}
+Nicholas~B Turk-Browne and Brian~J Scholl.
+\newblock Flexible visual statistical learning: Transfer across space and time.
+\newblock \emph{J Exp Psychol: Hum Perc Perf}, 35\penalty0 (1):\penalty0
+  195--202, 2009.
+
+\bibitem[Turk-Browne et~al.(2005)Turk-Browne, Jung\'{e}, and
+  Scholl]{Turk-Browne2005}
+Nicholas~B Turk-Browne, Justin Jung\'{e}, and Brian~J Scholl.
+\newblock The automaticity of visual statistical learning.
+\newblock \emph{J Exp Psychol Gen}, 134\penalty0 (4):\penalty0 552--64, 2005.
+\newblock \doi{10.1037/0096-3445.134.4.552}.
+
+\bibitem[Turk-Browne et~al.(2010)Turk-Browne, Scholl, Johnson, and
+  Chun]{Turk-Browne2010}
+Nicholas~B Turk-Browne, Brian~J Scholl, Marcia~K Johnson, and Marvin~M Chun.
+\newblock Implicit perceptual anticipation triggered by statistical learning.
+\newblock \emph{Journal of neuroscience}, 30:\penalty0 11177--11187, 2010.
+\newblock ISSN 1529-2401.
+\newblock \doi{10.1523/JNEUROSCI.0858-10.2010}.
+
+\bibitem[Verosky and Morgan(2021)]{Verosky2021}
+Niels~J. Verosky and Emily Morgan.
+\newblock Pitches that wire together fire together: Scale degree associations
+  across time predict melodic expectations.
+\newblock \emph{Cognitive science}, 45:\penalty0 e13037, 2021.
+\newblock ISSN 1551-6709.
+\newblock \doi{10.1111/cogs.13037}.
+
+\end{thebibliography}

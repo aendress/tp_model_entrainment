@@ -1,3 +1,12 @@
+# Custom stuff
+## Select directories
+paper/
+papers/
+
+## Other stuff
+code/figures/
+*.webloc
+
 # History files
 .Rhistory
 .Rapp.history
@@ -37,3 +46,11 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# Various Rmd compilation outputs
+*.log
+*.aux
+*.toc
+*.out
+*.html
+*.Rhistory
