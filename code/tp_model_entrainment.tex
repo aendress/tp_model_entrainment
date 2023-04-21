@@ -74,44 +74,48 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same} % disable monospaced font for URLs
 \hypersetup{
-  pdftitle={Hebbian learning can explain rhythmic entrainment to statistical regularities},
+  pdftitle={Hebbian learning can explain rhythmic neural entrainment to statistical regularities},
+  pdfauthor={Ansgar D. Endress, City, University of London},
   pdfkeywords={Keywords},
   hidelinks,
   pdfcreator={LaTeX via pandoc}}
 
-\title{Hebbian learning can explain rhythmic entrainment to statistical
-regularities}
-\author{Ansgar D. Endress, City, University of London\\
-Ana Fló, Cognitive Neuroimaging Unit, CNRS ERL 9003, INSERM U992, CEA,
-Université Paris-Saclay, NeuroSpin Center, Gif/Yvette, France}
+\title{Hebbian learning can explain rhythmic neural entrainment to
+statistical regularities}
+\author{Ansgar D. Endress, City, University of London}
 \date{}
 
 \begin{document}
 \maketitle
 \begin{abstract}
-THIS IS THE ABSTRACT FROM SOME OLD PAPER. IGNORE In many domains,
-organisms need to split continuous signals into sequences of recurring
-units. For example, during language acquisition, humans need to split
-fluent speech into its underlying words. One prominent candidate
-mechanism involves computation of co-occurrence statistics such
-Transitional Probabilities (TPs). TPs indicate how predictive items are
-of each other. For example, items such as syllables are more predictive
-of each other when they are part of the same unit (i.e., word) than when
-they come from different units. TP computations are surprisingly
-flexible and sophisticated. Humans are sensitive to (1) forward and
-backward TPs, (2) TPs between adjacent items and longer-distance TPs and
-(3) recognize TPs in both known and novel units. Here, we show that a
-simple and biologically plausible model explains these data. We present
-a network where excitatory interactions are tuned by Hebbian learning
-and where inhibitory interactions control the overall level of
-activation. We show that (1) if forgetting is weak, activations are so
-long-lasting that indiscriminate associations occur among \emph{all}
-items; (2) if forgetting is strong, activations are so short-lived that
-they do not persist after the offset of stimuli, and no associations are
-formed; and (3) for intermediate forgetting rates, this simple network
-accounts for all of the hallmarks mentioned above. Ironically,
-forgetting seems to be a key ingredient that enables these sophisticated
-learning abilities.
+In many domains, continuous sequences are composed of discrete recurring
+units. Learners need to extract these recurring units. A prime example
+is word learning. Fluent speech in unknown language is perceived as a
+continuous signal. Learners need to extract (and then memorize) its
+underlying words. One prominent candidate mechanism involves tracking
+how predictive syllables (or other items) are of one another, a strategy
+formalized as Transitional Probabilities (TPs). Syllables within the
+same word are more predictive of one another than syllables straddling
+word boundaries. Behaviorally, it is controversial whether such
+statistical learning abilities allow learners to extract and store the
+underlying units in memory, or whether they just track pairwise
+associations among syllables. The strongest evidence for the former view
+comes from electrophysiological results, showing evoked responses
+time-locked to word boundaries (e.g., N400's) as well as rhythmic
+activity with a periodicity of the unit duration. Here, I show that a
+simple Hebbian network can explain such results. When exposed to
+statistically structured syllable sequences, the network activation is
+rhythmic with a periodicity of the word duration and an activation
+maximum on word-final syllables. This is because word-final syllables
+receive more excitatory input from earlier syllables with which they are
+associated than syllables that occur earlier in words (and are less
+predictable). Hebbian learning can thus account for rhythmic neural
+activity in statistical learning task in the absence of memory
+representations for words, and previous reports of N400s time-locked to
+word boundaries might index the reduced predictability of word-initial
+syllables rather than word-onsets. I also suggest that learners might
+need to rely on other cues to extract and learn the words of their
+native language.
 \end{abstract}
 
 \hypertarget{introduction}{%
@@ -132,24 +136,29 @@ statistics tracking the predictability of syllables. For example, a
 syllable following ``the'' is much harder to predict than a syllable
 following ``whis''. After all, ``the'' can precede any noun, but there
 are very few words starting with ``whis'' (e.g., whiskey, whisker,
-\ldots). The most prominent version of such co-occurrence statistics
-involves Transitional Probabilities (TPs), i.e., the conditional
-probability of a syllable \(\sigma_2\) following another syllable
-\(\sigma_1\) \(P(\sigma_2|\sigma_1)\). In fact, infants, newborns and
-non-human animals are all sensitive to TPs
+\ldots).
+
+The most prominent version of such co-occurrence statistics involves
+Transitional Probabilities (TPs), i.e., the conditional probability of a
+syllable \(\sigma_2\) following another syllable \(\sigma_1\)
+\(P(\sigma_2|\sigma_1)\). Infants, newborns and non-human animals are
+all sensitive to TPs in a variety of modalities
 \citep{Aslin1998, Chen2015, Creel2004, Endress-tone-tps, Endress-Action-Axc, Fiser2002a, Fiser2005, Flo2022, Glicksohn2011, Hauser2001, Kirkham2002, Saffran1996b, Saffran-Science, Saffran1999, Saffran2001, Sohail2016, Toro2005-backward, Turk-Browne2005, Turk-Browne-reversal}.
 
 Following \citep{Aslin1998, Saffran-Science, Saffran1996b}, participants
-in a typical behavioral Statistical Learning experiment are first
-familiarized with a statistically structured speech stream (or a
-sequence in another modality). The speech stream is a random
-concatenation of triplets of non-sense syllables (hereafter ``words'').
-For example, if \emph{ABC}, \emph{DEF}, \emph{GHJ} and \emph{KLM} are
-``words'' (where each letter represents a syllable), syllables within
-words are more predictive of one another than syllable across
-word-boundaries. After all, the \emph{C} at the end of \emph{ABC} can be
-followed by the word-initial syllables of any of the other words. A
-sensitivity to TPs is then tested by measuring a preference between
+in a typical behavioral statistical learning experiment in the auditory
+modality are first familiarized with a statistically structured speech
+stream (or a sequence in another modality such as auditory tones or
+visual symbols). The speech stream is a random concatenation of triplets
+of non-sense syllables (hereafter ``words''). Syllables within words are
+thus more predictive of one another than syllable across
+word-boundaries. For example, if \emph{ABC}, \emph{DEF}, \emph{GHJ} and
+\emph{KLM} are ``words'' (where each letter represents a syllable), the
+\emph{C} at the end of \emph{ABC} can be followed by the word-initial
+syllables of any of the other words, while syllables within words
+predict each other with certainty.
+
+A sensitivity to TPs is then tested by measuring a preference between
 high-TP items (i.e., words) and low-TP items created by taking either
 the final syllable of one word and the first two syllables from another
 word (e.g., \emph{CDE}) or by taking the last two syllables of one word
@@ -181,8 +190,8 @@ explained by memory-less Hebbian learning mechanisms, and other
 attentional accounts \citep{Endress-stat-recall}.
 
 Critically, to the extent that a sensitivity to TPs relies on implicit
-learning mechanisms \citep{Christiansen2018, Perruchet2006}, Statistical
-Learning might be dissociable from explicit, declarative memory
+learning mechanisms \citep{Christiansen2018, Perruchet2006}, statistical
+learning might be dissociable from explicit, declarative memory
 (\citep{Cohen1980, Finn2016, Graf1984, Knowlton1996a, Poldrack2001, Sherman2020, Squire1992};
 though different memory mechanisms can certainly interact during
 consolidation \citep{Robertson2022}). In fact, there is evidence that a
@@ -200,62 +209,118 @@ encountered these items. Further, when learners have to repeat back the
 items they have encountered during a familiarization stream with as few
 as four items, they are unable to do so \citep{Endress-stat-recall}.
 
-On the other hand, there is a straightfoward explanation to such results
-that does not involve declarative LTM: a sensitivity to TPs might
-reflect Hebbian learning \citep{Endress-tone-tps, Endress-TP-Model}.
-After all, the representations of syllables (or other elements in a
-stream) presumably does not cease to be active as soon as the syllable
-ends. As a result, multiple syllables can be active together and can can
-thus form Hebbian associations. \citep{Endress-TP-Model} showed that
-such a network can account for a number of statistical learning results
-(see below).
+On the other hand, there is a straightforward explanation of such
+results that does not involve declarative LTM: a sensitivity to TPs
+might reflect Hebbian learning
+\citep{Endress-tone-tps, Endress-TP-Model}. After all, the
+representations of syllables (or other elements in a stream) presumably
+does not cease to be active as soon as the syllable ends. As a result,
+multiple syllables can be active together and can can thus form Hebbian
+associations. \citep{Endress-TP-Model} showed that such a network can
+account for a number of statistical learning results (see below).
 
-However, if statistical learning really reflects Hebbian, associative
-learning, it is difficult to see how one can explain the
-neurophysiological correlates of statistical learning. We will discuss
-this literature in the next section.
+However, there is another class of studies that seems to provide strong
+evidence for the possibility that statistical learning leads to the
+extraction of coherent units, and that seems to be inconsistent with a
+mere Hebbian interpretation of statistical learning results:
+electrophysiological responses to statistically structured sequences. I
+will now turn to this literature.
 
 \hypertarget{electrophysiological-correlates-of-statistical-learning}{%
 \subsection{Electrophysiological correlates of statistical
 learning}\label{electrophysiological-correlates-of-statistical-learning}}
 
-*** TO DO ANA ***
+In one of the earliest electrophysiological studies of statistical
+learning, \citep{Sanders2002} first presented participants with a speech
+stream composed of non-sense words. Following this, they presented these
+words in isolation, and finally another speech stream with the same
+words. When they compared electrical brain responses to the second
+presentation of the stream and its first presentation, they observed
+increased N100 and N400 responses. That is, they showed increased
+negativities around 100 ms and 400 ms after word onsets (see also
+\citep{Abla2008} for similar study with tones rather than syllables as
+stimuli). \citep{Cunillera2006} showed that N400 effects can also be
+obtained without explicitly training participants on the words, and
+similar results obtain even in newborns \citep{Kudo2011, Teinonen2009}.
 
-\citep{Batterink2017, Buiatti2009, Flo2022, Kabdebon2015, Moser2021}
+Following \citep{Buiatti2009}, electrophysiological investigations of
+statistical learning focused on rhythmic entrainment to the speech
+streams rather than event-related responses such as the N400.
+Specifically, if listeners learn the statistical structure of the speech
+stream, they should perceive the speech stream as a sequence of
+trisyllabic units (given that most statistical learning experiments tend
+to use tri-syllabic units or their equivalents in other domains, but see
+\citep{Johnson2010}), and thus perceive a rhythm with a periodicity of
+three syllable durations. If so, they should also show a \emph{neural}
+rhythm with the same periodicity. While \citep{Buiatti2009} detected
+such a rhythm only when words were separated by brief silences, later
+investigations found such rhythms in continuous sequences in adults
+\citep{Batterink2017} (see also \citep{Moser2021} for an
+magneto-encephalography study), children \citep{Moreau2022}, infants
+\citep{Kabdebon2015} and even newborns \citep{Flo2022}.
 
-\begin{itemize}
-\tightlist
-\item
-  DISCUSS N400 AND SIMILAR LITERATIRES, THEN ARGUE THAT IT IS ALSO
-  CONSISTENT WITH A NON-MEMORY EXPLANATION IF THE N400 INDEXES
-  SURPRISING SYLLABLES: IT WOULD NOT INDEX WORD ONSETS, BUT RATHER THE
-  LACK OF PREDICTABILITY AFTER PREDICTABLE SYLLABLES
-\item
-  DISCUSS ENTRAINMENT LITERATIRE
-\item
-  LINK THIS DISCUSSION BACK TO THE ISSUE THAT STATISTICAL LEARNING MIGHT
-  BE MORE USEFUL FOR PREDICTIVE PROCESSING. (CAN DO THIS MYSELF)
-\end{itemize}
+Such results seem to strongly suggest that statistical learning creates
+integrated units that can (presumably) be stored in memory, and
+different authors have reached this conclusion
+\citep{Batterink2017, Flo2022, Sanders2002, Teinonen2009}. However, the
+original interpretation of the N400 component suggests a different
+interpretation. In fact, the electrical N400 component is thought to
+reflect (semantically) surprising and thus unpredictable stimuli
+\citep{Kutas2000}. However, in speech streams such as those used in
+statistical learning tasks, word onsets are always unpredictable, given
+that words are randomly concatenated, and word onsets remain
+unpredictable even when participants learn the statistical structure of
+the speech stream. As a result, it is unclear why N400-like responses
+should be time-locked to word \emph{onsets.} In contrast, the last
+syllable of each word is predictable based on the statistical structure
+of the streams, but only after learning. As a result,
+electrophysiological responses might not so much index word onsets as
+reflect the increased predictability of word-final syllables (or the
+decreased relative predictability of word-initial syllables) as learning
+progresses.
 
-*** END TO DO ***
+A similar conclusion follows from simple associative considerations. For
+example, after a word \emph{ABC} is learned (where each letter stands
+for a syllable), each syllable predicts subsequent syllables. As a
+result, the \emph{C} syllable does not only receive (external) bottom-up
+excitation when it is encountered, but receives additional associative
+excitation from the preceding \emph{A} and \emph{B} syllables (that
+predict the \emph{C} syllable). As a result, one would expect a neural
+rhythm with a period of three syllable durations, and a maximum
+following the onset of the \emph{word-final} syllable even if no word
+has been stored in memory.
 
 \hypertarget{the-current-study}{%
 \section{The current study}\label{the-current-study}}
 
-Here, we show that such electrophysiological results can be explained in
-a simple, memory-less Hebbian network that has been used to account for
-a variety of Statistical Learning results \citep{Endress-TP-Model}. The
-network is a fairly generic saliency map
+Here, I provide computational evidence for this idea, and show that such
+electrophysiological results can be explained in a simple, memory-less
+Hebbian network that has been used to account for a variety of
+statistical learning results \citep{Endress-TP-Model}. The network is a
+fairly generic saliency map
 \citep{Bays2010, Endress-Catastrophic-Interference, Gottlieb2007, Roggeman2010, Sengupta2014}
 augmented by a Hebbian learning component. The network comprises units
-representing populations of neurons encoding syllables or other items.
-The network is fully connected with both excitatory and inhibitory
+representing populations of neurons encoding syllables (or other items).
+All units are fully connected with both excitatory and inhibitory
 connections. Excitatory connections change according to a Hebbian
 learning rule, while inhibitory connections do not undergo learning.
 Additionally, activation decays exponentially in all units. Further
 details of the model can be found in Supplementary Information XXX.
 
-Such an architecture can explain Statistical Learning results in a
+\begin{figure}
+\centering
+\includegraphics{figures/network_schema.pdf}
+\caption{Illustration of the network architecture with only three units
+\emph{A}, \emph{B} and \emph{C}. Here, these units encode syllable. All
+units mutually exite and inhibit one another. Excitatory connections
+undergo Hebbian learning. For example, unit \emph{A} excites unit
+\emph{B} with a tunable weight of \(w_{BA}\) as well as unit \emph{C}
+with a weight of \(w_{CA}\). In contrast, the inhibitory weight does not
+undergo learning. In addition to excitation and inhibition, all units
+undergo forgetting.}
+\end{figure}
+
+Such an architecture can explain statistical learning results in a
 relatively intuitive way. For example, if each syllable is represented
 by some population of neurons, and learners listen to some sequence
 \emph{ABCD}\ldots, associations should form between adjacent and
@@ -266,46 +331,51 @@ For example, if a neuron representing \emph{A} is still active while
 \emph{B} is presented, these neurons can form an association. Similarly,
 if a neuron representing \emph{A} is still active when \emph{C} is
 presented, an association between these neurons will ensue although the
-corresponding syllables are not adjacent. Further, this learning rule is
-non-directional. As a result, the network should be sensitive to
-associations irrespective of whether items are played in their original
-order (e.g., \emph{ABC}) or in reverse order (e.g., \emph{BCA}).
-\citep{Endress-TP-Model} showed that such a model can account for a
-number of Statistical Learning results (as long as the decay rate was
-set to a reasonable level) - in the absence of a dedicated memory store.
-Hence, Statistical Learning results can be explained even when
-participants do not create lexical entries for high-TP items.
+corresponding syllables are not adjacent.
 
-However, the rhythmic entrainment results above seem to suggest that
-learners do more than merely computing associations among syllables.
-Here, we argue that a simple Hebbian network can account for the
-periodic activity found in electrophysiological recordings as well.
-Intuitively, if a high-TP item such as \emph{ABC} is presented, \emph{A}
-mostly receives external stimulation, but \emph{B} receives external
-stimulation as well as excitatory input from \emph{A}, while \emph{C}
-receives external stimulation as well as excitatory input from both
-\emph{A} and \emph{B}. As a result, the network activation should
-increase towards the end of a word, leading to periodic activity with a
-period of a word duration (though the presence of inhibitory connections
-might make the exact results more complex). If so, previous reports of
-N400 near a word boundary would not so much indicate the onset of a
-``word'', but rather the onset of a ``surprising'' syllable.
+Further, this learning rule is non-directional. As a result, the network
+should be sensitive to associations irrespective of whether items are
+played in their original order (e.g., \emph{ABC}) or in reverse order
+(e.g., \emph{BCA}). \citep{Endress-TP-Model} showed that such a model
+can account for a number of statistical learning results (as long as the
+decay rate was set to a reasonable level) - in the absence of a
+dedicated memory store. Hence, statistical learning results can be
+explained even when participants do not create lexical entries for
+high-TP items.
 
-We tested this idea in \citep{Endress-TP-Model} model. We expose the
+However, the neural entrainment results above seem to suggest that
+learners do more than merely computing associations among syllables, and
+extract statistically coherent units
+\citep{Batterink2017, Flo2022, Sanders2002, Teinonen2009}. Here, I argue
+that this simple Hebbian network can also account for the periodic
+activity found in electrophysiological recordings. Intuitively, if a
+high-TP item such as \emph{ABC} is presented, \emph{A} mostly receives
+external stimulation, but \emph{B} receives external stimulation -- as
+well as excitatory input from \emph{A}, while \emph{C} receives external
+stimulation as well as excitatory input from both \emph{A} and \emph{B}.
+As a result, the network activation should increase towards the end of a
+word, with a maximum on the third syllable, leading to periodic activity
+with a period of a word duration (though the presence of inhibitory
+connections might make the exact results more complex). If so, and as
+mentioned above, previous reports of N400 near a word boundary would not
+so much indicate the onset of a ``word'', but rather the onset of a
+``surprising'' syllable.
+
+I tested this idea in \citep{Endress-TP-Model} model. I exposed the
 network to a continuous sequence inspired by \citep{Saffran-Science}
-Experiment 2. The sequence consists of 4 distinct words of 3 syllables
-each. The familiarization sequence is a random concatenations of these
-words, with each word occurring 100 times. During the test phase, we
-record the total network activation as each of the test-items (see
+Experiment 2. The sequence consisted of 4 distinct words of 3 syllables
+each. The familiarization sequence was a random concatenations of these
+words, with each word occurring 100 times. During the test phase, I
+recorded the total network activation as each of the test-items (see
 below) is presented, and assume that this activation reflects the
 network's familiarity with the words.\footnote{\citep{Endress-TP-Model}
   also reported simulations where they recorded the activation in the
   items comprising the current test-item rather than the global network
   activation. While the results were very similar to those using the
   total network activation, measuring activation in test items would not
-  be meaningful in the current simulations as we seek to uncover
-  periodic activity during familiarization.} We simulated 100
-participants by repeating the familiarization and test cycle 100 times.
+  be meaningful in the current simulations as I seek to uncover periodic
+  activity during familiarization.} I simulated 100 participants by
+repeating the familiarization and test cycle 100 times.
 
 The test items follow by \citep{Saffran-Science} and
 \citep{Saffran1996b}, among many others. After exposure to the
@@ -319,22 +389,22 @@ next word (e.g., \emph{C:DE}). Part-words are thus attested in the
 familiarization sequence, but straddle a word boundary. As a result,
 they have weaker TPs than words. Accordingly, the network should be more
 familiar with words than with part-words. To assess whether the network
-can also account for results presented by \citep{Flo2022} (see below),
-we also record activation after presenting the first two syllables of a
+can also account for results presented by \citep{Flo2022} (see below), I
+also record activation after presenting the first two syllables of a
 word (e.g., \emph{AB}) or the last two syllables (e.g., \emph{BC}).
 
 During the simulations, the network parameters for self-excitation and
 mutual inhibition are kept constant (\(\alpha\) and \(\beta\) in
 Supplementary Material XXX). However, in line with
-\citep{Endress-TP-Model}, we used different forgetting rates
+\citep{Endress-TP-Model}, I used different forgetting rates
 (\(\lambda_{act}\) in Supplementary Material XXX) between 0.1, 0.2, 0.3,
 0.4, 0.5, 0.6, 0.7, 0.8, 0.9. With exponential forgetting, a forgetting
 rate of 1 means that the activation completely disappears on the next
 time step (in the absence of excitatory input), a forgetting rate of
 zero means no forgetting at all, while a forgetting rate of .5 implies
 the activation is halved on the next time step (again, in the absence of
-excitatory input).\footnote{While we use the label ``decay'', we do not
-  claim that ``decay'' reflects a psychological processes. Our
+excitatory input).\footnote{While I use the label ``decay'', I do not
+  claim that ``decay'' reflects a psychological processes. The current
   implementation uses decay as a mechanism to limit activations in time,
   but the same effect could likely be obtained through inhibitory
   interactions or other mechanisms.}
@@ -348,21 +418,21 @@ excitatory input).\footnote{While we use the label ``decay'', we do not
 \subsection{Preference for words over
 part-words}\label{preference-for-words-over-part-words}}
 
-To establish the forgetting rates at which we observe discrimination
-between words and part-words (and thus learning), we first repeat some
-of \citep{Endress-TP-Model} results. We calculate normalized difference
+To establish the forgetting rates at which discrimination between words
+and part-words (and thus learning) can be observed, I first repeat some
+of \citep{Endress-TP-Model} results. I calculated normalized difference
 scores of activations for words and part-words,
 \(d = \frac{\text{Word} - \text{Part-Word}}{\text{Word} + \text{Part-Word}}\),
-and evaluate these difference scores in two ways. First, we compare them
-to the chance level of zero using Wilcoxon tests. Second, we count the
-number of simulations (representing different participants) preferring
-words, and to evaluate this count using a binomial test. With 100
-simulations per parameter set, performance is significantly different
-from the chance level of 50\% if at least 61 \% of the simulations show
-a preference for the target items.
+and evaluated these difference scores in two ways. First, I comparde
+them to the chance level of zero using Wilcoxon tests. Second, I counted
+the number of simulations (representing different participants)
+preferring words, and evaluated this count using a binomial test. With
+100 simulations per parameter set, performance is significantly
+different from the chance level of 50\% if at least 61 \% of the
+simulations show a preference for the target items.
 
 \begin{figure}
-\includegraphics[width=1\linewidth]{tp_model_entrainment_files/figure-latex/basic-experiment-global-create-plot-combined-fw-plot-1} \caption{(a) Difference scores between words and part-words for different forgetting rates (between .1 and .9). The scores are calculated based the global activation as a measure of the network's familiarity with the items. Significance is assessed based on Wilcoxon tests against the chance level of zero. (b). Percentage of simulations with a preference for words for different forgetting rates (between .1 and .9). The simulations are assessed based on the global activation in the network. The dashed line shows the minimum percentage of simulations that is significant based on a binomial test.}\label{fig:basic-experiment-global-create-plot-combined-fw-plot}
+\includegraphics[width=1\linewidth]{tp_model_entrainment_files/figure-latex/basic-experiment-global-create-plot-combined-fw-plot-1} \caption{Results based on the global activation as a measure of the network's familiarity with the items for forgetting rates (between 0.1 and 0.9). (a) Difference scores between words and part-words. Significance is assessed based on Wilcoxon tests against the chance level of zero. (b) Percentage of simulations with a preference for words over part-words. The dashed line shows the minimum percentage of simulations that is significant based on a binomial test.}\label{fig:basic-experiment-global-create-plot-combined-fw-plot}
 \end{figure}
 
 The results are shown in Figure
@@ -371,7 +441,7 @@ The results are shown in Figure
 forgetting rates of up to .4, the network prefers words over part-words,
 with somewhat better performance for words against \emph{C:DE}
 part-words, as has been observed in human participants by
-\citep{Fiser2002}. In the following, we will thus use forgetting rates
+\citep{Fiser2002}. In the following, I will thus use forgetting rates
 between 0.4 and 0.9 to model the electrophysiological results.
 
 \clearpage
@@ -384,11 +454,12 @@ results}\label{electrophysiological-results}}
 \subsubsection{Activation differences within
 words}\label{activation-differences-within-words}}
 
-We next asked whether a basic Hebbian learning model can explain
-periodic activity found in electrophysiological recordings (XXX),
-focusing on the forgetting rates in which the network preferred words to
-part-words. In a first analysis, we simply recorded the total network
-activation after each syllable in a word has been presented. These
+I next asked whether a basic Hebbian learning model can explain periodic
+activity found in electrophysiological recordings
+\citep{Buiatti2009, Batterink2017, Flo2022, Kabdebon2015, Moreau2022, Moser2021},
+focusing on the forgetting rates for which the network preferred words
+to part-words. In a first analysis, I simply recorded the total network
+activation after each syllable in a word had been presented. These
 activations were averaged for each syllable position (word-initial,
 word-medial and word-final) and for each participant after removing the
 first 200 words from the familiarization stream (during which the
@@ -398,22 +469,25 @@ As shown in Figure
 \ref{fig:basic-experiment-global-print-act-in-words-plot} and Table
 \ref{tab:basic-experiment-global-print-act-in-words-table2}, activation
 was highest after word-final syllables (though not for very low
-forgetting rates for which we did not observe learning in the first
+forgetting rates for which I did not observe learning in the first
 place). As a result, a simple Hebbian learning model can account for
 rhythmic activity in electrophysiological recordings with a period
-equivalent to the word duration. Critically, however, while previous
-electrophysiological responses to statistical structured streams were
-interpreted in terms of a response to word onsets (XXX), our results
-suggest an alternative interpretation of such results. Rather than
-signalling the beginnings and ends of words, an activation maximum after
-the third syllable of each word signals the predictability of the third
-syllable, while a sudden drop in activation after the first syllable
-indicates the lack of predictability.
+equivalent to the word duration. Critically, and as mentioned above,
+while previous electrophysiological responses to statistical structured
+streams were interpreted in terms of a response to word onsets
+\citep{Abla2008, Cunillera2006, Kudo2011, Sanders2002, Teinonen2009},
+the current results suggest an alternative interpretation of such
+effects. Rather than signalling the beginnings and ends of words, an
+activation maximum after the third syllable of each word might reflect
+the predictability of the third syllable, while a sudden drop in
+activation after the first syllable might indicate the lack of
+predictability. Importantly, such activation maxima can arise even if no
+word is stored in memory.
 
 The reason for which lower forgetting rates do not necessarily lead to
 rhythmic activity is the interplay between decay and inhibition. To
-assess this possibility, we recorded the number of active neurons after
-a burn-in phase of 600 items. As shown in Table
+assess this possibility, I recorded the number of active neurons after a
+burn-in phase of 600 items. As shown in Table
 \ref{tab:inspect-number-of-active-neurons-print2} and Figure
 \ref{fig:inspect-number-of-active-neurons-plot2}, more neurons remain
 active at any point in time when the decay rate is lower, and might thus
@@ -422,52 +496,52 @@ inhibitory input from other neurons, the pattern of connections between
 neurons then enables the network to exhibit periodic activity.
 
 \begin{figure}
-\includegraphics[width=1\linewidth]{tp_model_entrainment_files/figure-latex/basic-experiment-global-print-act-in-words-plot-1} \caption{Average total network activation for different syllables in 100 simulations in Endress and Johnson's network during the familiarization with a stream following Saffran et al. (1996). The facets show different forgetting rates. The results reflect the network behavior after the first 20 presentations of each word. }\label{fig:basic-experiment-global-print-act-in-words-plot}
+\includegraphics[width=1\linewidth]{tp_model_entrainment_files/figure-latex/basic-experiment-global-print-act-in-words-plot-1} \caption{Average total network activation for different syllable positions during the familiarization with a stream following cite{Saffran-Science}. The facets show different forgetting rates. The results reflect the network behavior after the first 50 presentations of each word.}\label{fig:basic-experiment-global-print-act-in-words-plot}
 \end{figure}
 
 \hypertarget{spectral-density}{%
 \subsubsection{Spectral density}\label{spectral-density}}
 
-We next analyzed the frequency response of the network to the speech
-streams. Specifically, we estimated the spectral density of the time
+I next analyzed the frequency response of the network to the speech
+streams. Specifically, I estimated the spectral density of the time
 series corresponding to the total network activation after each time
 step (again after a burnin of 200 words), separately for each decay rate
-and simulation. We then extracted the frequency with the maximal
-density. As shown in Figure
+and simulation. I then extracted the frequency with the maximal density.
+As shown in Figure
 \ref{fig:basic-experiment-global-print-freq-phase-plot}(a), the modal
 frequency for decay rates of least .4 was 1/3, corresponding to a period
-of three syllables. This results thus suggest again that a simple
+of three syllables. These results thus suggest again that a simple
 Hebbian learning mechanism can entrain to statistical rhythms in the
 absence of memory for words.
 
 \hypertarget{phase-analysis}{%
 \subsubsection{Phase analysis}\label{phase-analysis}}
 
-Our analyses of the network activations suggest that activations are
+The analyses of the network activations suggest that activations are
 strongest for word-final syllables, and that the network entrains to a
 periodicity of three syllables. However, the traditional interpretation
 of electrophysiological responses to statistical learning is that neural
 responses index word-initial syllables. To address this issue more
-directly, we calculated the phase of the network activation with respect
-to waveforms with maximua on word-initial, word-medial and word-final
-syllables, respectively. Specifically, we calculated the cross-spectrum
+directly, I calculated the phase of the network activation relative to
+wave forms with maxima on word-initial, word-medial and word-final
+syllables, respectively. Specifically, I calculated the cross-spectrum
 phase at the winning frequency between the total network activation and
 (1) three cosine reference waves with their maxima on the first, second
-or third syllable of a word as well as (2) a sawtooth function with its
+or third syllable of a word as well as (2) a saw-tooth function with its
 maximum on the third syllable. As shown in Figure
 \ref{fig:basic-experiment-global-print-freq-phase-plot}(b) and Table
 \ref{tab:basic-experiment-global-phase-table2}, the activation had a
-small relative phase with respect to the cosine with the maximum on the
+small relative phase relative to the cosine with the maximum on the
 third syllable or the saw tooth function. In contrast the phase relative
 to the cosine with the word-initial maximum was around 120 degrees,
-while that with respect to the cosine with the maximum on the second
+while that relative to the cosine with the maximum on the second
 syllable was around -120 degrees. These spectral analyses thus confirm
 that, at least for larger decay rates, the activation increases towards
 the end of a word, and that the network activation is roughly in phase
-with a function with a maximum on the third syllabe.
+with a function with a maximum on the third syllable.
 
 \begin{figure}
-\includegraphics[width=1\linewidth]{tp_model_entrainment_files/figure-latex/basic-experiment-global-print-freq-phase-plot-1} \caption{Spectral analysis of the total network activation in 100 simulations in Endress and Johnson's network during the familiarization with a stream following Saffran et al. (1996). The results reflect the network behavior after the first 20 presentations of each word. (a) Maximal frequency as a function of the forgeting rates. For forgetting rates where learning takes place, the dominant frequency is 1/3, and thus corresponds to the word length. (b) Relative phase (in degrees) at the maximal frequency of the total network activation relative to (from top to bottom) a cosine function with its maximum at word-intial syllables, word-second syllables and word-final syllables and a saw tooth function with the maximum on the third syllable. For forgetting rates where learning takes place, the total activation is in phase with a cosine with its maximum on the word-final syllable as well as with the corresponding saw tooth function.}\label{fig:basic-experiment-global-print-freq-phase-plot}
+\includegraphics[width=1\linewidth]{tp_model_entrainment_files/figure-latex/basic-experiment-global-print-freq-phase-plot-1} \caption{Spectral analysis of the total network activation during the familiarization with a stream following cite{Saffran-Science}. The results reflect the network behavior after the first 50 presentations of each word. (a) Maximal frequency as a function of the forgeting rates. For forgetting rates where learning takes place, the dominant frequency is 1/3, and thus corresponds to the word length. (b) Relative phase (in degrees) at the maximal frequency of the total network activation relative to (from top to bottom) a cosine function with its maximum at word-intial syllables, word-medial syllables and word-final syllables as well as a saw tooth function with the maximum on the third syllable. For forgetting rates where learning takes place, the total activation is in phase with a cosine with its maximum on the word-final syllable as well as with the corresponding saw tooth function.}\label{fig:basic-experiment-global-print-freq-phase-plot}
 \end{figure}
 
 \hypertarget{memory-for-word-onsets-vs.-offsets-flo2022}{%
@@ -477,13 +551,13 @@ with a function with a maximum on the third syllabe.
 The results so far suggest that a simple Hebbian network can reproduce
 rhythmic activity in the absence of memory for words. However,
 \citep{Flo2022} suggested that neonates retain at least the first
-syllable of statistical defined words. Specifically, they presented
-newborns with items starting with two syllables that occurred
-word-initially (AB\ldots), and with items starting with a word-medial
-syllable (BC\ldots) and observed early ERP differences between these
-items.
+syllable of statistical defined words, if not the entire words.
+Specifically, they presented newborns with items starting with two
+syllables that occurred word-initially (\emph{AB}\ldots), and with items
+starting with a word-medial syllable (\emph{BC}\ldots) and observed
+early ERP differences between these items.
 
-To reproduce these results, we measured the activation of the network in
+To reproduce these results, I measured the activation of the network in
 response to isolated, bisyllabic \emph{AB} and \emph{BC} test items,
 respectively. As shown in Figure
 \ref{fig:basic-experiment-global-print-act-after-2syll-plot} and Table
@@ -500,7 +574,7 @@ might, these analyses show that a memory-less system can reproduce
 differential responses to \emph{AB} and \emph{BC} items.
 
 \begin{figure}
-\includegraphics[width=1\linewidth]{tp_model_entrainment_files/figure-latex/basic-experiment-global-print-act-after-2syll-plot-1} \caption{Average difference in the total network activation for the first two syllables of a word (AB) and the first to syllables of a part-word (BC)  in 100 simulations in Endress and Johnson's network after  familiarization with a stream following Saffran et al. (1996). The results reflect the network behavior after the first 20 presentations of each word. Positive values indicate greater activation for the AB items than the BC items.}\label{fig:basic-experiment-global-print-act-after-2syll-plot}
+\includegraphics[width=1\linewidth]{tp_model_entrainment_files/figure-latex/basic-experiment-global-print-act-after-2syll-plot-1} \caption{Average difference in the total network activation for the first two syllables of a word (AB) and the first to syllables of a part-word (BC) after familiarization with a stream following cite{Saffran-Science}. The results reflect the network behavior after the first 50 presentations of each word. Positive values indicate greater activation for the AB items than the BC items.}\label{fig:basic-experiment-global-print-act-after-2syll-plot}
 \end{figure}
 
 \clearpage
@@ -515,23 +589,28 @@ use as words. Strong evidence in favor of this possibility comes from
 electrophysiology, where rhythmic activity has been observed in response
 to statistically structured sequences. In the time domain, different
 authors have observed amplitude peaks around the boundaries of
-statistically defined words (XXX); in the frequency domain, a frequency
-response with a period of the word duration emerges as participants
-learn the statistical structure of the speech stream (XXX).
+statistically defined words
+\citep{Abla2008, Cunillera2006, Kudo2011, Sanders2002, Teinonen2009}; in
+the frequency domain, a frequency response with a period of the word
+duration emerges as participants learn the statistical structure of the
+speech stream
+\citep{Buiatti2009, Batterink2017, Flo2022, Kabdebon2015, Moreau2022, Moser2021}.
 
-Here, we show that such results can be explained by a simple Hebbian
-learning model. When exposed to statistically structure sequences, the
+Here, I show that such results can be explained by a simple Hebbian
+learning model. When exposed to statistically structured sequences, the
 network activation increased towards the end of words due to increased
 excitatory input from second order associations. As a result, the
-network exhibits rhythmic activations with a period of a word duration.
+network exhibits rhythmic activity with a period of a word duration.
 Critically, given that the network could reproduce these results in the
 absence of memory representations for words, earlier
-electrophysiological results might thus index the statistical
-predictiveness of syllables rather than the acquisition of words. For
-example, and as mentioned above, N400 effects observed in statistical
-learning tasks (XXX) might not index the onset of words, but rather the
-lack of predictibility of word-initial syllables (or the increased
-predictibility of word-final syllables). This would also be more
+electrophysiological results might also index the statistical
+predictability of syllables rather than the acquisition of coherent
+units such as words. For example, and as mentioned above, N400 effects
+observed in statistical learning tasks
+\citep{Abla2008, Cunillera2006, Kudo2011, Sanders2002, Teinonen2009}
+might not index the onset of words, but rather the lack of
+predictability of word-initial syllables (or the increased
+predictability of word-final syllables). This would also be more
 consistent with the initial description of the N400 component as an ERP
 component that indexes \emph{unpredictable} events \citep{Kutas2000}.
 
@@ -548,7 +627,18 @@ and the inability of adult learners to repeat back words from
 familiarization streams with as few as four
 words\citep{Endress-stat-recall}.
 
-In contrast, Statistical Learning might well be important for predicting
+To identify words in fluent speech, learners might thus need to rely on
+other cues, including using known words as cues to word boundaries for
+other words \citep{Bortfeld2005, Brent2001, Mersad2012}, paying
+attention to beginnings and ends of utterances
+\citep{Monaghan2010, Seidl2008, Shukla2007}, phonotactic regularities
+\citep{McQueen1998} and universal aspects of prosody
+\citep{Brentari2011, Christophe2001, Endress-cross-seg, Pilon1981}.
+Computational results suggest that such cues are promising, given that a
+computational model attending to utterance edges showed excellent
+segmentation and word-learning abilities \citep{Monaghan2010}.
+
+In contrast, statistical learning might well be important for predicting
 events across time
 \citep{Endress-stat-recall, Morgan2019, Sherman2020, Turk-Browne2010, Verosky2021}
 and space \citep{Theeuwes2022}, an ability that is clearly critical for
@@ -574,11 +664,11 @@ The activation of the \(i^{th}\) unit is given by
 \dot{x_i} = -\lambda_a x_i + \alpha \sum_{j \neq i} w_{ij} F(x_j) - \beta \sum_{j \neq i} F(x_j) + \text{noise}
 \]
 
-where \(F(x)\) is some activation function. (Here we use
-\(F(x) = \frac{x}{1 + x}\). The first term represents exponential
-forgetting with a time constant of \(\lambda_a\), the second term
-activation from other units, and the third term inhibition among items
-to keep the overall activation in a reasonable range.
+where \(F(x)\) is some activation function. The current simulations use
+the function \(F(x) = \frac{x}{1 + x}\). The first term represents
+exponential forgetting with a time constant of \(\lambda_a\), the second
+term activation from other units, and the third term inhibition among
+items to keep the overall activation in a reasonable range.
 
 The weights \(w_{ij}\) are updated using a Hebbian learning rule
 
@@ -586,8 +676,8 @@ The weights \(w_{ij}\) are updated using a Hebbian learning rule
 \dot{w}_{ij} = - \lambda_w w_{ij} + \rho F(x_i) F(x_j) 
 \]
 
-\(\lambda_w\) is the time constant of forgetting (which we set to zero
-in our simulations) while \(\rho\) is the learning rate.
+\(\lambda_w\) is the time constant of forgetting (which I set to zero in
+the current simulations) while \(\rho\) is the learning rate.
 
 A discrete version of the activation equation is given by
 
@@ -596,17 +686,17 @@ x_i (t+1) = x_i (t) - \lambda_a x_i(t) + \alpha \sum_{j \neq i} w_{ij} F(x_j) - 
 \]
 
 While the time step is arbitrary in the absence of external input (see
-\citep{Endress-Catastrophic-Interference} for a proof), we use the
+\citep{Endress-Catastrophic-Interference} for a proof), I use the
 duration of individual units (e.g., syllables, visual symbols etc.) as
-the time unit in our discretization as associative learning is generally
+the time unit in the discretization as associative learning is generally
 invariant under temporal scaling of the experiment
 \citep{Gallistel2000PsychRev, Gallistel2001b}. Further, while only
 excitatory connections are tuned by learning in our model, the same
 effect could be obtained by tuning inhibition, for example through
-tunable disinhibitory interneurons \citep{Letzkus2011}. Here, we simply
+tunable disinhibitory interneurons \citep{Letzkus2011}. Here, I simply
 focus on the result that a fairly generic network architecture accounts
-for the hallmarks of statistical learning that, so far, have eluded
-explanation.
+for rhythmic network activity in response to statistically structured
+sequences.
 
 The discrete updating rule for the weights is
 
@@ -619,7 +709,7 @@ implementation is available at XXX.
 
 \begin{table}
 
-\caption{\label{tab:list-parameters2}\label{tab:params}Parameters used in the simulations}
+\caption{\label{tab:list-parameters2}\label{tab:params}Parameters used in the simulations XXX BEAUTIFY AS IN ORIGINAL PAPER}
 \centering
 \begin{tabular}[t]{ll}
 \toprule
@@ -766,7 +856,7 @@ $\Lambda$ & M & SE & p & M & SE & p & M & SE & p\\
 
 Table \ref{tab:inspect-number-of-active-neurons-print2} and Figure
 \ref{fig:inspect-number-of-active-neurons-plot2} show the number of
-simultaneously active neurons as a function of the forgetting rate/
+simultaneously active neurons as a function of the forgetting rate.
 
 \begin{table}
 
@@ -794,6 +884,8 @@ $\Lambda$ & M & SE\\
 \includegraphics[width=1\linewidth]{tp_model_entrainment_files/figure-latex/inspect-number-of-active-neurons-plot2-1} \caption{Average number of simultaneously active neurons as a function of the forgetting rate.}\label{fig:inspect-number-of-active-neurons-plot2}
 \end{figure}
 
+\clearpage
+
 \hypertarget{spectral-density-1}{%
 \subsubsection{Spectral density}\label{spectral-density-1}}
 
@@ -816,7 +908,7 @@ the different syllable positions.
 \cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5} \cmidrule(l{3pt}r{3pt}){6-7} \cmidrule(l{3pt}r{3pt}){8-9}
 $\Lambda$ & M & SE & M & SE & M & SE & M & SE\\
 \midrule
-0.4 & 10.65114 & 5.0737440 & 112.03150 & 7.4748326 & -73.557408 & 6.3598153 & -99.853135 & 7.0339273\\
+0.4 & 10.65114 & 5.0737440 & 112.45997 & 7.3758587 & -73.557408 & 6.3598153 & -99.853135 & 7.0339273\\
 0.5 & 55.72199 & 0.0443242 & 175.72199 & 0.0443242 & -64.278009 & 0.0443242 & -94.278009 & 0.0443242\\
 0.6 & 82.00705 & 0.0511961 & -157.99295 & 0.0511961 & -37.992953 & 0.0511961 & -67.992952 & 0.0511961\\
 0.7 & 128.41318 & 0.0445116 & -111.58682 & 0.0445116 & 8.413184 & 0.0445116 & -21.586815 & 0.0445116\\
@@ -840,7 +932,7 @@ bigrams at word onsets and word offsets, respectively.
 
 \begin{table}
 
-\caption{\label{tab:basic-experiment-global-print-difference-between-parts-of-word2}Activation difference between items composed of the first two items of a word and the last two items of a word, when these bigrams were presented in isolation. Positive values indicate greater activation for the AB items than the BC items. The p value reflects a two sided Wilcoxon signed rank test against the chance level of zero}
+\caption{\label{tab:basic-experiment-global-print-difference-between-parts-of-word2}Activation difference between items composed of the first two syllables of a word and the last two syllables of a word, when these bigrams were presented in isolation. Positive values indicate greater activation for the AB items than the BC items. The p value reflects a two-sided Wilcoxon signed rank test against the chance level of zero}
 \centering
 \begin{tabular}[t]{rrrr}
 \toprule

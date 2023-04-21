@@ -1,10 +1,17 @@
 \providecommand{\noopsort}[1]{}
-\begin{thebibliography}{75}
+\begin{thebibliography}{88}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Abla et~al.(2008)Abla, Katahira, and Okanoya]{Abla2008}
+Dilshat Abla, Kentaro Katahira, and Kazuo Okanoya.
+\newblock On-line assessment of statistical learning by event-related
+  potentials.
+\newblock \emph{J Cogn Neurosci}, 20\penalty0 (6):\penalty0 952--964, 2008.
+\newblock \doi{10.1162/jocn.2008.20058}.
 
 \bibitem[Aslin et~al.(1998)Aslin, Saffran, and Newport]{Aslin1998}
 Richard~N Aslin, Jenny~R Saffran, and Elissa~L Newport.
@@ -15,8 +22,7 @@ Richard~N Aslin, Jenny~R Saffran, and Elissa~L Newport.
 \bibitem[Batterink and Paller(2017)]{Batterink2017}
 Laura~J. Batterink and Ken~A. Paller.
 \newblock Online neural monitoring of statistical learning.
-\newblock \emph{Cortex; a journal devoted to the study of the nervous system
-  and behavior}, 90:\penalty0 31--45, May 2017.
+\newblock \emph{Cortex}, 90:\penalty0 31--45, May 2017.
 \newblock ISSN 1973-8102.
 \newblock \doi{10.1016/j.cortex.2017.02.004}.
 
@@ -28,6 +34,21 @@ Paul~M Bays, Victoria Singh-Curry, Nikos Gorgoraptis, Jon Driver, and Masud
   damage to human parietal cortex.
 \newblock \emph{J Neurosci}, 30:\penalty0 5968--5978, 2010.
 \newblock \doi{10.1523/JNEUROSCI.0997-10.2010}.
+
+\bibitem[Bortfeld et~al.(2005)Bortfeld, Morgan, Golinkoff, and
+  Rathbun]{Bortfeld2005}
+Heather Bortfeld, James~L Morgan, Roberta~Michnick Golinkoff, and Karen
+  Rathbun.
+\newblock Mommy and me: {F}amiliar names help launch babies into speech-stream
+  segmentation.
+\newblock \emph{Psychol Sci}, 16\penalty0 (4):\penalty0 298--304, 2005.
+\newblock \doi{10.1111/j.0956-7976.2005.01531.x}.
+
+\bibitem[Brent and Siskind(2001)]{Brent2001}
+MR~Brent and JM~Siskind.
+\newblock The role of exposure to isolated words in early vocabulary
+  development.
+\newblock \emph{Cognition}, 81\penalty0 (2):\penalty0 B33--44, 2001.
 
 \bibitem[Brentari et~al.(2011)Brentari, Gonz\'alez, Seidl, and
   Wilbur]{Brentari2011}
@@ -85,6 +106,16 @@ Sarah~C Creel, Elissa~L Newport, and Richard~N Aslin.
 \newblock \emph{J Exp Psychol Learn Mem Cogn}, 30\penalty0 (5):\penalty0
   1119--30, 2004.
 \newblock \doi{10.1037/0278-7393.30.5.1119}.
+
+\bibitem[Cunillera et~al.(2006)Cunillera, Toro, Sebastián-Gallés, and
+  Rodríguez-Fornells]{Cunillera2006}
+Toni Cunillera, Juan~M. Toro, Nuria Sebastián-Gallés, and Antoni
+  Rodríguez-Fornells.
+\newblock The effects of stress and statistical cues on continuous speech
+  segmentation: an event-related brain potential study.
+\newblock \emph{Brain research}, 1123:\penalty0 168--178, December 2006.
+\newblock ISSN 0006-8993.
+\newblock \doi{10.1016/j.brainres.2006.09.046}.
 
 \bibitem[Endress(2010)]{Endress-tone-tps}
 Ansgar~D. Endress.
@@ -287,6 +318,12 @@ Elizabeth~K Johnson and Amanda~H Seidl.
 \newblock \emph{Dev Sci}, 12\penalty0 (1):\penalty0 131--41, 2009.
 \newblock \doi{10.1111/j.1467-7687.2008.00740.x}.
 
+\bibitem[Johnson and Tyler(2010)]{Johnson2010}
+Elizabeth~K Johnson and Michael~D Tyler.
+\newblock Testing the limits of statistical learning for word segmentation.
+\newblock \emph{Dev Sci}, 13\penalty0 (2):\penalty0 339--45, 2010.
+\newblock \doi{10.1111/j.1467-7687.2009.00886.x}.
+
 \bibitem[Jones and Pashler(2007)]{Jones2007}
 Jason Jones and Harold Pashler.
 \newblock Is the mind inherently forward looking? comparing prediction and
@@ -332,6 +369,13 @@ B~J Knowlton, J~A Mangels, and L~R Squire.
 \newblock \emph{Science}, 273:\penalty0 1399--1402, 1996.
 \newblock ISSN 0036-8075.
 
+\bibitem[Kudo et~al.(2011)Kudo, Nonaka, Mizuno, Mizuno, and Okanoya]{Kudo2011}
+Noriko Kudo, Yulri Nonaka, Noriko Mizuno, Katsumi Mizuno, and Kazuo Okanoya.
+\newblock On-line statistical segmentation of a non-speech auditory stream in
+  neonates as demonstrated by event-related brain potentials.
+\newblock \emph{Dev Sci}, 14\penalty0 (5):\penalty0 1100--1106, 2011.
+\newblock \doi{10.1111/j.1467-7687.2011.01056.x}.
+
 \bibitem[Kutas and Federmeier(2000)]{Kutas2000}
 Kutas and Federmeier.
 \newblock Electrophysiology reveals semantic memory use in language
@@ -354,6 +398,11 @@ Roger Levy.
 \newblock \emph{Cognition}, 106\penalty0 (3):\penalty0 1126--1177, 2008.
 \newblock \doi{10.1016/j.cognition.2007.05.006}.
 
+\bibitem[McQueen(1998)]{McQueen1998}
+James~M. McQueen.
+\newblock Segmentation of continuous speech using phonotactics.
+\newblock \emph{J Mem Lang}, 39\penalty0 (1):\penalty0 21--46, 1998.
+
 \bibitem[Medina et~al.(2011)Medina, Snedeker, Trueswell, and
   Gleitman]{Medina2011}
 Tamara~Nicol Medina, Jesse Snedeker, John~C. Trueswell, and Lila~R. Gleitman.
@@ -361,6 +410,31 @@ Tamara~Nicol Medina, Jesse Snedeker, John~C. Trueswell, and Lila~R. Gleitman.
 \newblock \emph{Proc Natl Acad Sci U S A}, 108\penalty0 (22):\penalty0
   9014--9019, 2011.
 \newblock \doi{10.1073/pnas.1105040108}.
+
+\bibitem[Mersad and Nazzi(2012)]{Mersad2012}
+Karima Mersad and Thierry Nazzi.
+\newblock When mommy comes to the rescue of statistics: Infants combine
+  top-down and bottom-up cues to segment speech.
+\newblock \emph{Language Learning and Development}, 8\penalty0 (3):\penalty0
+  303--315, 2012.
+\newblock \doi{10.1080/15475441.2011.609106}.
+
+\bibitem[Monaghan and Christiansen(2010)]{Monaghan2010}
+Padraic Monaghan and Morten~H. Christiansen.
+\newblock Words in puddles of sound: modelling psycholinguistic effects in
+  speech segmentation.
+\newblock \emph{J Child Lang}, 37\penalty0 (3):\penalty0 545--564, 2010.
+\newblock \doi{10.1017/S0305000909990511}.
+
+\bibitem[Moreau et~al.(2022)Moreau, Joanisse, Mulgrew, and
+  Batterink]{Moreau2022}
+Christine~N. Moreau, Marc~F. Joanisse, Jerrica Mulgrew, and Laura~J. Batterink.
+\newblock No statistical learning advantage in children over adults: Evidence
+  from behaviour and neural entrainment.
+\newblock \emph{Developmental cognitive neuroscience}, 57:\penalty0 101154,
+  September 2022.
+\newblock ISSN 1878-9307.
+\newblock \doi{10.1016/j.dcn.2022.101154}.
 
 \bibitem[Morgan et~al.(2019)Morgan, Fogel, Nair, and Patel]{Morgan2019}
 Emily Morgan, Allison Fogel, Anjali Nair, and Aniruddh~D Patel.
@@ -449,6 +523,20 @@ Jenny~R Saffran, EK~Johnson, Richard~N Aslin, and Elissa~L Newport.
 \newblock Statistical learning of tone sequences by human infants and adults.
 \newblock \emph{Cognition}, 70\penalty0 (1):\penalty0 27--52, 1999.
 
+\bibitem[Sanders et~al.(2002)Sanders, Newport, and Neville]{Sanders2002}
+Lisa~D. Sanders, Elissa~L. Newport, and Helen~J. Neville.
+\newblock Segmenting nonsense: an event-related potential index of perceived
+  onsets in continuous speech.
+\newblock \emph{Nature neuroscience}, 5:\penalty0 700--703, July 2002.
+\newblock ISSN 1097-6256.
+\newblock \doi{10.1038/nn873}.
+
+\bibitem[Seidl and Johnson(2008)]{Seidl2008}
+Amanda Seidl and Elizabeth~K Johnson.
+\newblock Boundary alignment enables 11-month-olds to segment vowel initial
+  words from speech.
+\newblock \emph{J Child Lang}, 35\penalty0 (1):\penalty0 1--24, 2008.
+
 \bibitem[Sengupta et~al.(2014)Sengupta, Surampudi, and Melcher]{Sengupta2014}
 Rakesh Sengupta, Bapi~Raju Surampudi, and David Melcher.
 \newblock A visual sense of number emerges from the dynamics of a recurrent
@@ -468,7 +556,7 @@ Brynn~E. Sherman and Nicholas~B. Turk-Browne.
 \bibitem[Shoaib et~al.(2018)Shoaib, Wang, Hay, and Lany]{Shoaib2018}
 Amber Shoaib, Tianlin Wang, Jessica~F. Hay, and Jill Lany.
 \newblock Do infants learn words from statistics? evidence from
-  english-learning infants hearing italian.
+  {E}nglish-learning infants hearing {I}talian.
 \newblock \emph{Cognitive Science}, 42\penalty0 (8):\penalty0 3083--3099, 2018.
 \newblock \doi{10.1111/cogs.12673}.
 
@@ -501,6 +589,15 @@ Larry~R. Squire.
 \newblock \emph{Psychological Review}, 99\penalty0 (2):\penalty0 195--231,
   1992.
 \newblock \doi{10.1037/0033-295x.99.2.195}.
+
+\bibitem[Teinonen et~al.(2009)Teinonen, Fellman, N\"a\"at\"anen, Alku, and
+  Huotilainen]{Teinonen2009}
+Tuomas Teinonen, Vineta Fellman, Risto N\"a\"at\"anen, Paavo Alku, and Minna
+  Huotilainen.
+\newblock Statistical language learning in neonates revealed by event-related
+  brain potentials.
+\newblock \emph{BMC Neurosci}, 10:\penalty0 21, 2009.
+\newblock \doi{10.1186/1471-2202-10-21}.
 
 \bibitem[Theeuwes et~al.(2022)Theeuwes, Bogaerts, and van
   Moorselaar]{Theeuwes2022}
