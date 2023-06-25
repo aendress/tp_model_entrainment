@@ -1,0 +1,2126 @@
+---
+title: 'Hebbian learning can explain rhythmic neural entrainment to statistical regularities'
+author: Ansgar D. Endress, City, University of London
+bibliography:
+    - ../misc/ansgar.bib
+output:
+  pdf_document:
+    citation_package: natbib
+    keep_tex: yes
+    number_sections: yes
+    toc: no
+  html_notebook:
+    number_sections: yes
+    theme: spacelab
+    toc: yes
+    toc_float: yes
+  html_document:
+    df_print: paged
+    number_sections: yes
+    theme: spacelab
+    toc: yes
+    toc_float: yes
+  word_document:
+    toc: no
+keywords: Keywords
+csl: ../misc/apa.csl
+abstract: In many domains, continuous sequences are composed of discrete recurring units. Learners need to extract these recurring units. A prime example is word learning. Fluent speech in unknown language is perceived as a continuous signal. Learners need to extract (and then memorize) its underlying words. One prominent candidate mechanism involves tracking how predictive syllables (or other items) are of one another, a strategy formalized as Transitional Probabilities (TPs). Syllables within the same word are more predictive of one another than syllables straddling word boundaries. Behaviorally, it is controversial whether such statistical learning abilities allow learners to extract and store the underlying units in memory, or whether they just track pairwise associations among syllables. The strongest evidence for the former view comes from electrophysiological results, showing evoked responses time-locked to word boundaries (e.g., N400's) as well as rhythmic activity with a periodicity of the unit duration. Here, I show that a simple Hebbian network can explain such results. When exposed to statistically structured syllable sequences, the network activation is rhythmic with a periodicity of the word duration and an activation maximum on word-final syllables. This is because word-final syllables receive more excitatory input from earlier syllables with which they are associated than syllables that occur earlier in words (and are less predictable). Hebbian learning can thus account for rhythmic neural activity in statistical learning task in the absence of memory representations for words, and previous reports of N400s time-locked to word boundaries might index the reduced predictability of word-initial syllables rather than word-onsets. I also suggest that learners might need to rely on other cues to extract and learn the words of their native language.       
+---
+
+```{r extract-code-for-debug, eval = FALSE, include = FALSE}
+knitr::purl(input = "tp_model_entrainment.Rmd", output = "tp_model_entrainment.R")
+```
+
+```{r setup, echo = FALSE, include=FALSE}
+rm (list=ls())
+
+#load("~/Experiments/TP_model/tp_model.RData")
+
+#options (digits = 3)
+knitr::opts_chunk$set(
+    # Run the chunk
+    eval = TRUE,
+    # Don't include source code
+    echo = FALSE, 
+    # Print warnings to console rather than the output file
+    warning = FALSE,  
+    # Stop on errors
+    error = FALSE,
+    # Print message to console rather than the output file
+    message = FALSE,
+    # Include chunk output into output
+    include = TRUE,
+    # Don't reformat R code
+    tidy = FALSE,
+    # Center images
+    # Breaks showing figures side by side, so switch this to default
+    #fig.align = 'center', 
+    fig.align = 'default', 
+    # Show figures where they are produced
+    fig.keep = 'asis',
+    # Prefix for references like \ref{fig:chunk_name}
+    #fig.lp = 'fig:',
+    # For double figures, and doesn't hurt for single figures 
+    #fig.show = 'hold', 
+    # Default image width
+    out.width = '100%')
+
+# other knits options are here:
+# https://yihui.name/knitr/options/
+
+```
+
+```{r load-libraries, echo = FALSE, include = FALSE, message = FALSE, warning = FALSE}
+
+# Read in a random collection of custom functions
+if (Sys.info()[["user"]] %in% c("ansgar", "endress")){
+    source ("/Users/endress/R.ansgar/ansgarlib/R/tt.R")
+    source ("/Users/endress/R.ansgar/ansgarlib/R/null.R")
+    #source ("helper_functions.R")
+} else {
+    # Note that these will probably not be the latest versions
+    source("https://endress.org/progs/tt.R")
+    source("https://endress.org/progs/null.R")
+}
+
+install.load::install_load(
+    "knitr",
+    "latex2exp",
+    "cowplot",
+    # Parellel version of purrr
+    "furrr",
+    "rlist", # for list.rbind
+    "docxtools", # for format_engr
+    "future", # for parallel processing
+    "rstatix", 
+    "lsa" # for cosine
+)
+
+future::plan(multisession, workers = future::availableCores() - 1)
+```
+
+```{r set-default-parameters-network, echo = FALSE, include = FALSE, message = FALSE, warning = FALSE}
+
+# Number of neurons
+N_NEURONS <- 19
+
+ACT_FNC <- 'rational_logistic'
+
+# Forgetting for activation
+L_ACT_DEFAULT <- 0.5
+L_ACT_SAMPLES <- seq(.1, .9, .1)
+#L_ACT <- L_ACT_DEFAULT
+L_ACT <- L_ACT_SAMPLES
+
+# Forgetting for weights
+L_W <- 0
+
+# Activation coefficient
+A <- .7
+
+# Inhibition coefficient 
+B <- .4
+
+# Learning coefficient
+R <- 0.05
+
+# noise for activation
+NOISE_SD_ACT <- 0.001
+
+# noise for weights
+NOISE_SD_W <- 0
+```
+
+```{r set-default-parameters-simulations, echo = FALSE, include = FALSE, message = FALSE, warning = FALSE}
+
+# Number of items (e.g., words)
+N_WORDS <- 4
+
+# Number of units per item (e.g., syllables)
+N_SYLL_PER_WORD <- 3
+
+# Number of repetitions per word
+N_REP_PER_WORD <- 100
+
+# Number of repetitions per word before spectral information is computed
+N_REP_PER_WORD_BURNIN <- 50
+
+# Number of simulations/subjects
+N_SIM <- 100
+
+# Number of items (i.e., syllables) before activations around word onsets are inspected
+N_ITEMS_BEFORE_ACTIVATION_INSPECTION <- 600
+
+# Just return the number of active neurons for each syllable or also the identity of the neurons in each words 
+SIMPLIFY_ACTIVATION_INSPECTION <- TRUE
+
+# Adjust number of neurons if required
+if (N_NEURONS < ((N_WORDS * N_SYLL_PER_WORD) + 1))
+    N_NEURONS <- (N_WORDS * N_SYLL_PER_WORD) + 1
+
+PRINT.INDIVIDUAL.PDFS <- TRUE
+current.plot.name <- "xxx"
+
+# Set seed to Cesar's birthday
+set.seed (1207100)
+```
+
+```{r list-parameters, echo = FALSE, results='hide'}
+list_parameters(accepted_classes = c("numeric")) %>%
+    knitr::kable(
+        "latex", 
+        booktabs = T, 
+        caption='\\label{tab:params}Parameters used in the simulations XXX BEAUTIFY AS IN ORIGINAL PAPER') %>%
+    kableExtra::kable_styling()
+```
+
+```{r define-functions, echo = FALSE, include = FALSE, message = FALSE, warning = FALSE}
+
+act_fnc <- function (act, fnc = ACT_FNC, ...){
+    
+    switch(fnc,
+            "rational_logistic" = act / (1 + act),
+            "relu" = pmax(0, act),
+            "tanh" = tanh(act),
+            stop("Unknown activation function"))
+}
+
+make_act_vector <- function (ind, n_neurons){
+    
+    act <- rep (0, n_neurons)
+    act[ind] <- 1
+    
+    return (act)
+    
+}
+
+update_activation <- function (act, w, ext_input, l_act = 1, a = 1, b = 0, noise_sd = 0, ...){
+    # activation, weights, external_input, decay, activation coefficient, inhibition coefficient
+    
+    act_output <- act_fnc (act, ...)
+    
+    act_new <- act
+    
+    # Decay     
+    if (l_act>0)
+        act_new <- act_new - l_act * act 
+    
+    # External input
+    act_new <- act_new + ext_input
+    
+    # Excitation
+    act_new <- act_new + (a * w %*% act_output)
+    
+    # Inhibition (excluding self-inhibition)
+    act_new <- act_new - (b * (sum (act_output) - act_output))
+    
+    # Noise
+    if (noise_sd > 0)    
+        act_new <- act_new + rnorm (length(act_new), 0, noise_sd)
+    
+    act_new <- as.vector(act_new)
+    
+    act_new[act_new < 0] <- 0
+    
+    return (act_new)
+}
+
+update_weights <- function (w, act, r = 1, l = 0, noise_sd, ...){
+    
+    act_output <- act_fnc (act, ...)
+    
+    # learning 
+    w_new <- w  + r * outer(act_output, act_output)
+    
+    # decay
+    if (l > 0)
+        w_new <- w_new - l * w 
+    
+    if (noise_sd > 0)
+        w_new <- w_new + as.matrix (rnorm (length(w_new),
+                                           0,
+                                           noise_sd),
+                                    ncol = ncol (w_new))
+    
+    # No self-excitation
+    diag (w_new) <- 0
+    
+    w_new[w_new < 0] <- 0
+    
+    return (w_new)
+}
+
+familiarize <- function (stream_matrix,
+                         l_act = 1,
+                         a = 1,
+                         b = 0, 
+                         noise_sd_act = 0,
+                         r = 1,
+                         l_w = 0,
+                         noise_sd_w = 0,
+                         n_neurons = max (stream),
+                         return.act.and.weights = FALSE,
+                         ...){
+    
+    # Initialization
+    current_act <- abs(rnorm (n_neurons, 0, noise_sd_act))
+    w <- matrix (abs(rnorm (n_neurons^2, 0, noise_sd_w)), 
+                 ncol = n_neurons)
+    diag(w) <- 0
+    
+    if (return.act.and.weights)
+        act.weight.list <- list ()
+    
+    # Randomize familiarization 
+    stream_matrix <- stream_matrix[sample(nrow(stream_matrix)),]
+    # c() conccatenates columns, so this is correct
+    stream <- c(t(stream_matrix))
+    
+    act_sum <- c()
+    for (item in stream){
+        
+        current_input <- make_act_vector(item, n_neurons)
+        
+        current_act <- update_activation(current_act, w, current_input, 
+                                 l_act, a, b, noise_sd_act,
+                                 ...)
+        
+        if (r > 0)
+            w <- update_weights (w, current_act, r, l_w, noise_sd_w)
+        
+        act_sum <- c(act_sum, sum(current_act))
+        
+        if (return.act.and.weights){
+            act.weight.list[[1 + length(act.weight.list)]] <- 
+                list (item = item,
+                      act = current_act,
+                      w = w)
+            
+        }
+    }
+    
+    if (return.act.and.weights)
+        return (list (
+            w = w,
+            act_sum = act_sum,
+            act.weight.list = act.weight.list))
+    else
+        return (list (
+            w = w,
+            act_sum = act_sum))
+}
+
+test_list <- function (test_item_list,
+                       w,
+                       l_act = 1, a = 1, b = 0, 
+                       noise_sd_act = 0,
+                       n_neurons,
+                       return.global.act = FALSE,
+                       ...) {
+    # Arguments
+    #   test_item_list  List of test-items (i.e., numeric vectors)
+    #   w               Current weight matrix
+    #   l_act           Forgetting rate for activation. Default:  1
+    #   a               Excitatory coefficient. Default: 1
+    #   b               Inhibitory coefficient. Default: 0
+    #   noise_sd_act    Standard deviation of the activation noise. Default: 0
+    #   n_neurons       Number of neurons in the network.
+    #   return.global.act 
+    #                   Sum total activation in each test-item (TRUE) or just 
+    #                   the activation in the test-item (FALSE)
+    #                   Default: FALSE
+    
+    test_act_sum <- data.frame (item = character(),
+                                act = numeric ())
+    
+    for (ti in test_item_list){
+        
+        act <- abs(rnorm (n_neurons, 0, noise_sd_act))
+        
+        act_sum <- c()
+        
+        for (item in ti){
+            
+            current_input <- make_act_vector(item, n_neurons)
+            act <- update_activation(act, res$w, current_input, 
+                                     l_act, a, b, noise_sd_act,
+                                     ...)
+            
+            if (return.global.act)
+                act_sum <- c(act_sum, sum(act))
+            else 
+                act_sum <- c(act_sum, sum(act[ti]))
+        }
+        
+        test_act_sum <- rbind (test_act_sum,
+                               data.frame (item = paste (ti, collapse="-"),
+                                           act = sum (act_sum)))
+    }   
+    
+    test_act_sum <- test_act_sum %>%
+        column_to_rownames ("item") %>% 
+        t
+    
+    return (test_act_sum)
+}
+
+make_diff_score <- function (dat = ., 
+                             col.name1,
+                             col.name2,
+                             normalize.scores = TRUE,
+                             luce.rule = FALSE){
+    
+    if (luce.rule){
+            d.score <- dat[,col.name1]
+            normalize.scores <- TRUE
+    } else {
+        d.score <- dat[,col.name1] - dat[,col.name2]
+    }
+    
+    if (any (d.score != 0) &&
+        (normalize.scores))
+        d.score = d.score / (dat[,col.name1] + dat[,col.name2])
+    
+    return (d.score)
+    
+}
+
+summarize_condition <- function (dat,
+                                 selected_cols,
+                                 selected_cols_labels){ 
+    
+    sapply (selected_cols,
+            function (X){
+                c(M = mean (dat[,X]),
+                  SE = mean (dat[,X]) / 
+                      sqrt (length (dat[,X]) -1),
+                  p.wilcox = wilcox.test (dat[,X])$p.value,
+                  p.simulations = mean (dat[,X] > 0))
+            },
+            USE.NAMES = TRUE) %>% 
+        #signif (3) %>%
+        as.data.frame() %>%
+        setNames (gsub ("\n", " ",
+                        selected_cols_labels[selected_cols])) %>%
+        # format_engr removes them otherwise
+        rownames_to_column ("Statistic")
+        #docxtools::format_engr(sigdig=3) 
+    
+}
+
+format_p_simulations <- function (prop_sim){ 
+    
+    p_sim <- 100 * prop_sim
+    
+    min_diff_from_chance <- 
+        get.min.number.of.correct.trials.by.binom.test(N_SIM)
+    min_diff_from_chance <- 100 * min_diff_from_chance / N_SIM
+    min_diff_from_chance <- min_diff_from_chance - 50
+    
+    p_sim <- ifelse (abs (p_sim-50) >= min_diff_from_chance,
+                    paste ("({\\bf ", p_sim, " \\%})", 
+                           sep =""), 
+                    paste ("(", p_sim, " \\%)", 
+                           sep ="") )
+    
+    return (p_sim)
+}
+
+get_sign_pattern_from_results <- function (l_act, dat){
+
+    sign_pattern <- lapply (l_act, 
+        function (CURRENT_L){
+            tmp_p_values <- dat %>%
+                filter (l_act == CURRENT_L) %>%
+                dplyr::select (-c("l_act")) %>%
+                column_to_rownames("Statistic")
+            
+            # Convert the proportion of simulations with a given outcome 
+            # to a string; note that the proportion always gives the proportion 
+            # for the majority pattern
+            tmp_p_simulations <- tmp_p_values["p.simulations",] %>%
+                mutate_all(format_p_simulations)
+            
+            # Extract the significance pattern into 
+            # * + (significant preference for target)
+            # * - (significant preference for foil)
+            # * 0 (no significant preference)
+            tmp_sign_pattern <- (tmp_p_values["p.wilcox",] <= .05) * 1
+            tmp_sign_pattern <- tmp_sign_pattern * 
+                sign(tmp_p_values["M",])
+            
+            tmp_sign_pattern <- tmp_sign_pattern %>%
+                mutate_all(function (X) 
+                    ifelse (X > 0, 
+                            "+", 
+                            ifelse (X < 0, 
+                                    "-", 
+                                    "0") ) )
+            
+            tmp_sign_pattern <- 
+                tmp_sign_pattern %>%
+                as.data.frame() %>%
+                paste (., tmp_p_simulations, sep = " ") %>% 
+                t () %>%
+                as.data.frame() %>%
+                setNames (names (tmp_sign_pattern)) %>% 
+                add_column(l_act = CURRENT_L, .before = 1) %>%
+                rownames_to_column("rowname") %>%
+                dplyr::select (-c("rowname"))
+            
+            return (tmp_sign_pattern)
+        }
+    )
+    
+    sign_pattern <- do.call ("rbind", sign_pattern)
+    
+    sign_pattern
+}
+
+get_sign_pattern_for_plot %<a-% {
+    # From https://github.com/kassambara/ggpubr/issues/79
+    
+    . %>%
+        melt (id.vars = "l_act",
+              variable.name= "ItemType",
+              value.name = "d") %>%
+        group_by (l_act, ItemType) %>%
+        rstatix::wilcox_test(d ~ 1, mu = 0) %>%
+        mutate (p.star = ifelse (p > .05, "",
+                                 ifelse (p > .01,
+                                         "*",
+                                         ifelse (p > .001,
+                                                 "**",
+                                                 "***")))) %>%
+        mutate(y.position = 0)
+}
+ 
+add_signif_to_plot <- function (gp, 
+                                dat.df,
+                                selected_cols){
+ 
+    panel.info <- ggplot_build(gp)$layout$panel_params
+
+    y.max <- lapply (panel.info, 
+               function (X) max (X$y.range)) %>% 
+        unlist %>%
+        rep (., each = length (selected_cols))
+
+    df.signif <- dat.df[,c("l_act",
+                         selected_cols)] %>%
+        get_sign_pattern_for_plot %>%
+        mutate (y.position = y.max)
+    
+    gp <- gp + 
+        ggpubr::stat_pvalue_manual(df.signif, 
+                               label="p.star", 
+                               xmin="l_act", 
+                               xmax = "ItemType", 
+                               remove.bracket = TRUE)
+
+    return (gp)
+}
+
+
+format_theme %<a-% 
+{
+    theme_light() +
+        theme(#text = element_text(size=20), 
+            plot.title = element_text(size = 18, hjust = .5),
+            axis.title = element_text(size=16),
+            axis.text.x = element_text(size=14, angle = 45),
+            axis.text.y = element_text(size=14),
+            legend.title = element_text(size=16),
+            legend.text = element_text(size=14))
+}
+
+remove_x_axis  %<a-% 
+{
+    
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())
+}
+
+rename_stuff_in_tables %<a-% {
+    . %>%
+        setNames (gsub ("l_act", "$\\\\lambda_a$", names (.))) %>%
+        mutate (Statistic = compose (
+            function (X) {gsub ("^M$", "*M*", X)},
+            function (X) {gsub ("^SE$", "*SE*", X)},
+            function (X) {gsub ("^p.wilcox$", "$p_{Wilcoxon}$", X)},
+            function (X) {gsub ("^p.simulations$", "$P_{Simulations}$", X)}
+        ) (Statistic)) 
+}
+
+find_chain_parts <- function() {
+    # From https://stackoverflow.com/questions/42560389/get-name-of-dataframe-passed-through-pipe-in-r
+    i <- 1
+    while(!("chain_parts" %in% ls(envir=parent.frame(i))) && i < sys.nframe()) {
+          i <- i+1
+      }
+    parent.frame(i)
+}
+
+print.plot <- function (p, 
+                        p.name = NULL,
+                        print.pdf = PRINT.INDIVIDUAL.PDFS){
+    
+    if (is.null (p.name)){
+    # From https://stackoverflow.com/questions/42560389/get-name-of-dataframe-passed-through-pipe-in-r
+    
+     ee <- find_chain_parts()
+     p.name <- deparse(ee$lhs)
+    }
+    
+    if (print.pdf){
+        
+        pdf.name = sprintf ("figures/%s.pdf",
+                            gsub ("\\.", "\\_",
+                                  p.name))
+        pdf (pdf.name)
+        print (p)
+        invisible(dev.off ())
+    }
+    
+    print (p)
+}
+
+italisize_for_tex <- function (x = .){
+    gsub("\\*(.+?)\\*", 
+         "{\\\\em \\1}", 
+         x, perl = TRUE)
+}
+
+```
+
+```{r define-caption-functions}
+
+# Here we define functions to print the figure captions for consistency across figures
+
+get.comparisons.for.caption <- function (experiment_type){
+    
+    if (experiment_type == "basic") {
+        
+        return ("Unit vs. Part-Unit: {\\em ABC} vs. {\\em BC:D} and {\\em ABC} vs. {\\em C:DE}; Rule-Unit vs. Class-Unit: {\\em AGC} vs. {\\em AGF} and {\\em AXC} vs. {\\em AXF}")
+        
+    } else if (experiment_type == "phantoms") {
+        
+        return ("Unit vs. Part-Unit: {\\em ABC} vs. {\\em BC:D} and {\\em ABC} vs. {\\em C:DE}; Phantom-Unit vs. Part-Unit: Phantom-Unit vs. {\\em BC:D} and Phantom-Unit vs. {\\em C:DE}; Unit vs. Phantom-Unit")
+        
+    } else {
+        stop ("Unknown experiment type.")
+    }
+}
+
+write.caption.diff.scores <- function (experiment_type, label, order, activation_type) {
+    
+    comparisons <- get.comparisons.for.caption(experiment_type)
+    
+    caption.text <- sprintf('\\label{fig:%s}Difference scores for items presented in {\\bf %s order}, different forgetting rates (0, 0.2, 0.4, 0.6, 0.8 and 1), and for the different comparisons (%s). The scores are calculated based the %s as a measure of the network\'s familiarity with the items. Significance is assessed based on Wilcoxon tests against the chance level of zero.',
+                            label, order, comparisons, activation_type)
+    
+    return (caption.text)
+}
+
+write.caption.p.sim <- function (experiment_type, label, order, activation_type) {
+    
+    comparisons <- get.comparisons.for.caption(experiment_type)
+    
+    caption.text <- sprintf('\\label{fig:%s}Percentage of simulations with a preference for the target items for items presented in {\\bf %s order}, different forgetting rates (0, 0.2, 0.4, 0.6, 0.8 and 1) and for the different comparisons (%s). The simulations are assessed based on the %s. The dashed line shows the minimum percentage of simulations that is significant based on a binomial test.',
+                            label, order, comparisons, activation_type)
+    
+    return (caption.text)
+}
+
+```
+
+```{r define-spectral-analysis-functions}
+
+make.reference.waves <- function (T = ., length.out){
+    
+
+    # Base reference wave of a cosine with phase 0 (and there for the maximum at zero)   
+    # Will add a sawtooth function later
+    reference.wave <- cos (2 * pi * (0:(T-1)) / T)
+     
+    
+    # Now make the matrix of reference waves with different phases in different columns
+    m.reference.waves <- matrix (nrow = T, ncol = T+1)
+    for (phase in 0:(T-1)){
+        m.reference.waves[,phase+1] <- cyclic.shift (reference.wave, -phase)
+    }
+    # add sawtoothfunction 
+    m.reference.waves[,T+1] <- seq (0, 1, length.out = T)
+    
+    # Make a list of matrices with the reference waves. As the phases are in different columsn
+    # the rbind concatenation creates a column with repeates of the wave
+    m.reference.waves <- map (1:(length.out/T),
+                              ~ m.reference.waves) %>% 
+        do.call (rbind, .)
+    
+    # Make time series object. Invidual time series are in columns
+    ts (m.reference.waves, 
+        names = c(paste0 ("cos.phase", 0:(T-1)),
+                  "sawtooth"))
+        
+    
+}
+
+extract.relevant.phase <- function (phase = ., freq.index, comparison.ts = NULL, phase.units = c("parts.of.cycle", "radians", "degrees")) {
+    
+    phase.units <- match.arg (phase.units)
+    
+    # According to the spectrum documentation 
+    # Column i + (j - 1) * (j - 2)/2 of phase contains the squared coherency between columns i and j of x, where i < j.
+    # Each row contains the phase 
+    
+    
+    # Fix the reference so the formula below is correct
+    reference.ts = 1
+    
+    if (is.null (comparison.ts)) {
+        # Inverting the formula above to extract the original number of time series
+        # The number of columns in phase corresponds to the cross-spectrum phase for the  i = n.time.series - 1 and j = n.time.series columns in the original time series:
+        # ncol (phase) = C = (N - 1) + (N - 1) * (N - 2)/ 2 = (N - 1) * (1 + N/2 - 1) = (N - 1) * N/2
+        # => C = 1/2 * (N^2 -N) = 1/2 * (N^2 - N + 1/4 - 1/4) = 1/2 * (N - 1/2)^2 - 1/8
+        # => 8 * C + 1 = 4 * (N - 1/2)^2 => sqrt (8 * C + 1) / 2 = N - 1/2
+        n.time.series <- 0.5 * (1 + sqrt (8 * ncol (phase) + 1))
+        
+        comparison.ts <- 2:n.time.series 
+    }
+    
+    # Now extract the relevant phase at the winning frequency
+    relevant.phase <- phase[freq.index, reference.ts + (comparison.ts - 1) * (comparison.ts - 2)/2] 
+    
+    case_when(
+        phase.units == "parts.of.cycle" ~ relevant.phase / (2 * pi),
+        phase.units == "degrees" ~ relevant.phase / (2 * pi) * 360, 
+        phase.units == "radians" ~ relevant.phase
+    )
+    
+    
+    
+}
+
+
+get.act.freq.phase <- function (x = ., T.reference.wave = 3, phase.units = c("parts.of.cycle", "radians", "degrees")){
+    # Arguments
+    # x: Time series
+    # T.reference.wave: Period of the reference time series
+    # phase.units: Units for Phase 
+    
+    
+    # average activation 
+    x %>% 
+        matrix (ncol = 3, byrow = TRUE) %>% 
+        colMeans() -> act.in.words
+        
+    
+    # Spectral analysis
+    phase.units <- match.arg (phase.units)
+    
+    # Create time series from input vector
+    observed.wave <- as.ts (x)
+    
+    # Default is cosine with maximum on third item
+    reference.waves <- make.reference.waves(T.reference.wave, length (x))
+
+    # Extract spectrum from each of the time series
+    spec.observed.reference <- spectrum (ts.intersect(observed.wave,
+                                                      reference.waves),
+                                         plot = FALSE)
+
+    # Find the index of the maximal frequency for each time series
+    max.index <- apply (spec.observed.reference$spec, 2, which.max)
+    
+    # Find the correspond frequency for the first (i.e., observed time series)
+    max.freq <- spec.observed.reference$freq[max.index[1]]
+
+    phase <- extract.relevant.phase (spec.observed.reference$phase,
+                                     max.index[1],
+                                     phase.units = phase.units)
+                                     
+
+    c (max.freq, phase, act.in.words) %>% 
+        matrix (nrow = 1) %>% 
+        as.data.frame %>% 
+        setNames(c("freq", paste0 ("phase.", colnames (reference.waves)), paste0("act.s", 1:T.reference.wave)))
+    
+}
+
+inspect.activation.in.single.word <- function (act.weight.list = ., preceding.context = 1){
+    # Inspect activations around the onset of a word. 
+    # act.weight.list is supposed to have the format from familiarize
+    # This function returns the activations around a SINGLE word. The word is supposed to be made of the entire list
+    # Return value: data frame with the columns
+    # pos.in.word: position in list
+    # input: current input
+    # n.active: number of active neurons
+    # active1 ... activeN: IDs of currently active neurons
+    # activation1 ... activationN: Activation of these neurons
+    # total: sum of activations
+    
+
+    bind_cols(
+        # Find current input
+        data.frame (
+            input = get.from.list(act.weight.list,
+                                  "item")  %>% 
+                unlist
+        ),
+        
+        # Find identity of currently active neurons
+        furrr::future_map (get.from.list(act.weight.list,
+                           "act"),
+             ~ which (.x > 0)) %>% 
+            rlist::list.rbind() %>% 
+            #do.call ("rbind", .) %>% 
+            as.data.frame %>% 
+            set_names(paste0 ("active", 1:ncol (.))) %>% 
+            mutate (n.active = ncol (.), .before = 1),
+        
+        # Find activation of currently active neurons
+        furrr::future_map (get.from.list(act.weight.list,
+                           "act"),
+             ~ .x[which (.x > 0)]) %>% 
+            rlist::list.rbind() %>% 
+            #do.call ("rbind", .) %>% 
+            as.data.frame %>% 
+            set_names(paste0 ("activation", 1:ncol (.))) %>% 
+            rowwise %>% 
+            mutate (total = sum (c_across()))
+    ) %>% 
+        # Add position in list (that corresponds to the syllable position in words)
+        mutate (pos.in.word = (1:nrow (.)) - preceding.context)
+    
+}
+
+
+inspect.activation <- function (act.weight.list = ., burnin = N_ITEMS_BEFORE_ACTIVATION_INSPECTION, word.length = N_SYLL_PER_WORD, preceding.context = 1, max.words = Inf, simplify = SIMPLIFY_ACTIVATION_INSPECTION ){
+    
+    
+    
+    # Inspect activations around the onset of a words. 
+    # act.weight.list is supposed to have the format from familiarize
+    # This function returns the activations around a ALL word after burnin
+    # Return value: data frame with the columns
+    # For simplify == TRUE
+    # n.active: number of active neurons
+    
+    # For simplify == FALSE
+    # word.ind : index of word among the remaining words 
+    # pos.in.word: position in list
+    # input: current input
+    # n.active: number of active neurons
+    # active1 ... activeN: IDs of currently active neurons
+    # activation1 ... activationN: Activation of these neurons
+    # total: sum of activations
+
+    
+    if (simplify){
+        # Just analyze the activations syllable by syllable. This is more useful if we just want to extract the total number of active items
+        
+        return (
+            data.frame (
+                n.active = 1 * ((
+                    get.from.list(
+                        act.weight.list[N_ITEMS_BEFORE_ACTIVATION_INSPECTION:length (act.weight.list)],
+                        "act") %>% 
+                        rlist::list.rbind())> 0) %>% 
+                    rowSums()) 
+            
+            #inspect.activation.in.single.word (act.weight.list[N_ITEMS_BEFORE_ACTIVATION_INSPECTION:length (act.weight.list)])
+        )
+    }
+    
+    # Use this code to inspect which actual neurons are active. 
+
+    # Number of words to analyze
+    n.words <- (length (act.weight.list) - N_ITEMS_BEFORE_ACTIVATION_INSPECTION) / N_SYLL_PER_WORD
+    n.words <- min (n.words, max.words) 
+    
+    
+    # Starting indices for words
+    start.ind <- seq (1, n.words * N_SYLL_PER_WORD, 3)
+    # Add preceding context 
+    start.ind <- start.ind - preceding.context
+    # Shift by burnin
+    start.ind <- start.ind + burnin
+    
+    # End indices for words
+    end.ind <- seq (N_SYLL_PER_WORD, n.words * N_SYLL_PER_WORD, 3)
+    # Shift by burnin
+    end.ind <- end.ind + burnin
+    
+    furrr::future_pmap_dfr (list (word.ind = 1:n.words,
+                    start.ind = start.ind,
+                    end.ind = end.ind),
+              ~ inspect.activation.in.single.word (act.weight.list[..2:..3],
+                                                   preceding.context = preceding.context) %>% 
+                  mutate (word.ind = ..1, .before = 1)
+    ) 
+    
+    
+    
+}
+
+
+```
+    
+
+# Introduction
+During language acquisition, word learning is challenging even when the phonological form of words is known [@Gillette1999;@Medina2011]. However, speech in unknown languages often appears as a continuous signal with few cues to word onsets and offsets (but see [@Brentari2011; @Christophe2001; @Endress-cross-seg; @Johnson2001a; @Johnson2009; @Pilon1981; @Shukla2007; @Shukla2011]). As a result, learners first need to discover where words start and where they end before than can commit any phonological word form to memory [@Aslin1998;@Saffran-Science;@Saffran1996b] (and hopefully link it to some meaning). This challenge is called the segmentation problem. 
+
+Learners might solve the segmentation problem using co-occurrence statistics tracking the predictability of syllables. For example, a syllable following "the" is much harder to predict than a syllable following "whis". After all, "the" can precede any noun, but there are very few words starting with "whis" (e.g., whiskey, whisker, ...).
+
+The most prominent version of such co-occurrence statistics involves Transitional Probabilities (TPs), i.e., the conditional probability of a syllable $\sigma_2$ following another syllable $\sigma_1$ $P(\sigma_2|\sigma_1)$. Infants, newborns and non-human animals are all sensitive to TPs in a variety of modalities [@Aslin1998;@Chen2015;@Creel2004;@Endress-tone-tps;@Endress-Action-Axc;@Fiser2002a;@Fiser2005;@Flo2022;@Glicksohn2011;@Hauser2001;@Kirkham2002; @Saffran1996b;@Saffran-Science;@Saffran1999;@Saffran2001;@Sohail2016;@Toro2005-backward;@Turk-Browne2005;@Turk-Browne-reversal]. 
+
+Following [@Aslin1998;@Saffran-Science;@Saffran1996b], participants in a typical behavioral statistical learning experiment in the auditory modality are first familiarized with a statistically structured speech stream (or a sequence in another modality such as auditory tones or visual symbols). The speech stream is a random concatenation of triplets of non-sense syllables (hereafter "words"). Syllables within words are thus more predictive of one another than syllable
+across word-boundaries. For example, if *ABC*, *DEF*, *GHJ* and *KLM* are "words"  (where each letter represents a syllable), the *C* at the end of *ABC* can be followed by the word-initial syllables of any of the other words, while syllables within words predict each other with certainty.
+
+A sensitivity to TPs is then tested by measuring a preference between high-TP items (i.e., words) and low-TP items created by taking either the final syllable of one word and the first two syllables from another word (e.g., *CDE*) or by taking the last two syllables of one word and the first syllable of the next word (e.g., *BCD*); the low-TP items are called part-words. Participants (adults, infants or other animals) usually discriminate between words and part-words, suggesting that they are sensitive to TPs. In humans, such a sensitivity to TPs might be the first step towards word learning. 
+
+## Does statistical learning help learners memorizing words?
+
+While many authors propose that tracking TPs leads to the addition of words to the mental lexicon (and thus to storage of word candidates in declarative long-term memory, LTM) [@Erickson2014; @Estes2007; @Hay2011a; @Isbilen2020; @Karaman2018; @Perruchet2019; @Shoaib2018], the extent to which a sensitivity to TPs really supports word learning is debated, and  the results supporting this view often have alternative explanations that do not involve declarative LTM (see [@Endress2020; @Endress-stat-recall] for critical reviews). For example, while high-TP items are sometimes easier to memorize than low-TP items [@Estes2007; @Hay2011a; @Isbilen2020; @Karaman2018], it is unclear if any LTM representation have been formed during statistical learning, or whether statistical associations simply facilitate subsequent associations. Likewise, while incomplete high-TP items are sometimes harder to recognize than entire items, such results can be explained by memory-less Hebbian learning mechanisms, and other attentional accounts [@Endress-stat-recall]. 
+
+Critically, to the extent that a sensitivity to TPs relies on implicit learning mechanisms [@Christiansen2018;@Perruchet2006], statistical learning might be dissociable from explicit, declarative memory ([@Cohen1980; @Finn2016; @Graf1984; @Knowlton1996a; @Poldrack2001; @Sherman2020; @Squire1992]; though different memory mechanisms can certainly interact during consolidation [@Robertson2022]). In fact, there is evidence that a sensitivity to TPs is *not* diagnostic of the addition of items to the mental lexicon. For example, observers sometimes prefer high-TP items to low-TP items when they have never encountered either of them (when the items are played backwards compared to the familiarization stream; [@Endress-Action-Axc; @Turk-Browne-reversal; @Jones2007]), and sometimes prefer high-TP items they have never encountered over low-TP items they have heard or seen [@Endress-Phantoms-Vision; @Endress-Phantoms]. In such cases, a preference for high-TP items does not indicate that the high-TP items are stored in the mental lexicon, simply because learners have never encountered these items. Further, when learners have to repeat back the items they have encountered during a familiarization stream with as few as four items, they are unable to do so [@Endress-stat-recall]. 
+
+On the other hand, there is a straightforward explanation of such results that does not involve declarative LTM: a sensitivity to TPs might reflect Hebbian learning [@Endress-tone-tps;@Endress-TP-Model]. After all, the representations of syllables (or other elements in a stream) presumably does not cease to be active as soon as the syllable ends. As a result, multiple syllables can be active together and can can thus form Hebbian associations. [@Endress-TP-Model] showed that such a network can account for a number of statistical learning results  (see below). 
+
+However, there is another class of studies that seems to provide strong evidence for the possibility that statistical learning leads to the extraction of coherent units, and that seems to be inconsistent with a mere Hebbian interpretation of statistical learning results: electrophysiological responses to statistically structured sequences. I will now turn to this literature. 
+
+## Electrophysiological correlates of statistical learning
+In one of the earliest electrophysiological studies of statistical learning, [@Sanders2002] first presented participants with a speech stream composed of non-sense words. Following this, they presented these words in isolation, and finally another speech stream with the same words. When they compared electrical brain responses to the second presentation of the stream and its first presentation, they observed increased N100 and N400 responses. That is, they showed increased negativities around 100 ms and 400 ms after word onsets (see also [@Abla2008] for similar study with tones rather than syllables as stimuli). [@Cunillera2006] showed that N400 effects can also be obtained without explicitly training participants on the words, and similar results obtain even in newborns [@Kudo2011;@Teinonen2009].
+
+Following [@Buiatti2009], electrophysiological investigations of statistical learning focused on rhythmic entrainment to the speech streams rather than event-related responses such as the N400. Specifically, if listeners learn the statistical structure of the speech stream, they should perceive the speech stream as a sequence of trisyllabic units (given that most statistical learning experiments tend to use tri-syllabic units or their equivalents in other domains, but see [@Johnson2010]), and thus perceive a rhythm with a periodicity of three syllable durations. If so, they should also show a *neural* rhythm with the same periodicity. While [@Buiatti2009] detected such a rhythm only when words were separated by brief silences, later investigations found such rhythms in continuous sequences in adults [@Batterink2017] (see also [@Moser2021] for an magneto-encephalography study), children [@Moreau2022], infants [@Kabdebon2015] and even newborns [@Flo2022]. 
+
+Such results seem to strongly suggest that statistical learning creates integrated units that can (presumably) be stored in memory, and different authors have reached this conclusion [@Batterink2017;@Flo2022;@Sanders2002;@Teinonen2009]. However, the original interpretation of the N400 component suggests a different interpretation. In fact, the electrical N400 component is thought to reflect (semantically) surprising and thus unpredictable stimuli [@Kutas2000]. However, in speech streams such as those used in statistical learning tasks, word onsets are always unpredictable, given that words are randomly concatenated, and word onsets remain unpredictable even when participants learn the statistical structure of the speech stream. As a result, it is unclear why N400-like responses should be time-locked to word *onsets.* In contrast, the last syllable of each word is predictable based on the statistical structure of the streams, but only after learning. As a result, electrophysiological responses might not so much index word onsets as reflect the increased predictability of word-final syllables (or the decreased relative predictability of word-initial syllables) as learning progresses. 
+
+A similar conclusion follows from simple associative considerations. For example, after a word *ABC* is learned (where each letter stands for a syllable), each syllable predicts subsequent syllables. As a result, the *C* syllable does not only receive (external) bottom-up excitation when it is encountered, but receives additional associative excitation from the preceding *A* and *B* syllables (that predict the *C* syllable). As a result, one would expect a neural rhythm with a period of three syllable durations, and a maximum following the onset of the *word-final* syllable even if no word has been stored in memory.
+
+# The current study
+Here, I provide computational evidence for this idea, and show that such electrophysiological results can be explained in a simple, memory-less Hebbian network that has been used to account for a variety of statistical learning results [@Endress-TP-Model]. The network is a fairly generic saliency map [@Bays2010;@Endress-Catastrophic-Interference;@Gottlieb2007;@Roggeman2010;@Sengupta2014] augmented by a Hebbian learning component. The network comprises units representing populations of neurons encoding syllables (or other items). All units are fully connected with both excitatory and inhibitory connections. Excitatory connections change according to a Hebbian learning rule, while inhibitory connections do not undergo learning. Additionally, activation decays exponentially in all units. Further details of the model can be found in Supplementary Information XXX.
+
+![Illustration of the network architecture with only three units *A*, *B* and *C*. Here, these units encode syllable. All units mutually exite and inhibit one another. Excitatory connections undergo Hebbian learning. 
+For example, unit *A* excites unit *B* with a tunable weight of $w_{BA}$ as well as unit *C* with a weight of $w_{CA}$. In contrast, the inhibitory weight does not undergo learning. In addition to excitation and inhibition, all units undergo forgetting.](figures/network_schema.pdf)
+
+
+
+Such an architecture can explain statistical learning results in a relatively intuitive way. For example, if each syllable is represented by some population of neurons, and learners listen to some sequence *ABCD*..., associations should form between adjacent and non-adjacent syllables depending on the decay rate. If activation decay is slower than a syllable duration, the representations of two adjacent syllables will be active at the same time, and thus form an association. For example, if a neuron representing *A* is still active while *B* is presented, these neurons can form an association. Similarly, if a neuron representing *A* is still active when *C* is presented, an association between these neurons will ensue although the corresponding syllables are not adjacent.
+
+Further, this learning rule is non-directional. As a result, the network should be sensitive to associations irrespective of whether items are played in their original order (e.g., *ABC*) or in reverse order (e.g., *BCA*). [@Endress-TP-Model] showed that such a model can account for a number of statistical learning results (as long as the decay rate was set to a reasonable level) - in the absence of a dedicated memory store. Hence, statistical learning results can be explained even when participants do not create lexical entries for high-TP items. 
+
+However, the neural entrainment results  above seem to suggest that learners do more than merely computing associations among syllables, and extract statistically coherent units [@Batterink2017;@Flo2022;@Sanders2002;@Teinonen2009]. Here, I argue that this simple Hebbian network can also account for the periodic activity found in electrophysiological recordings. Intuitively, if a high-TP item such as *ABC* is presented, *A* mostly receives external stimulation, but *B* receives external stimulation -- as well as excitatory input from *A*, while *C* receives external stimulation as well as excitatory input from both *A* and *B*. As a result, the network activation should increase towards the end of a word, with a maximum on the third syllable, leading to periodic activity with a period of a word duration (though the presence of inhibitory connections might make the exact results more complex). If so, and as mentioned above, previous reports of N400 near a word boundary would not so much indicate the onset of a "word", but rather the onset of a "surprising" syllable.  
+
+I tested this idea in [@Endress-TP-Model] model. I exposed the network to a continuous sequence inspired by [@Saffran-Science] Experiment 2. The sequence consisted of `r N_WORDS` distinct words of `r N_SYLL_PER_WORD` syllables each. The familiarization sequence was a random concatenations of these words, with each word occurring `r N_REP_PER_WORD` times. During the test phase, I recorded the total network activation as each of the test-items (see below) is presented, and assume that this activation reflects the network's familiarity with the words.[^activation_in_items] I simulated `r N_SIM` participants by repeating the familiarization and test cycle `r N_SIM` times.
+
+[^activation_in_items]: [@Endress-TP-Model] also reported simulations where they recorded the activation in the items comprising the current test-item rather than the global network activation. While the results were very similar to those using the total network activation, measuring activation in test items would not be meaningful in the current simulations as I seek to uncover periodic activity during familiarization. 
+
+The test items follow by [@Saffran-Science] and [@Saffran1996b], among many others. After exposure to the familiarization sequence, activation is recorded in response to words such as *ABC* and "part-words." As mentioned above, part-words comprise either the last two syllables from one word and the first syllable from the next word (e.g., *BC:D*, where the colon indicates the former word boundary that is not present in the stimuli) or the last syllable from one word and the first two syllables from the next word (e.g., *C:DE*). Part-words are thus attested in the familiarization sequence, but straddle a word boundary. As a result, they have weaker TPs than words. Accordingly, the network should be more familiar with words than with part-words. To assess whether the network can also account for results presented by [@Flo2022] (see below), I also record activation after presenting the first two syllables of a word (e.g., *AB*) or the last two syllables (e.g., *BC*).
+
+During the simulations, the network parameters for self-excitation and mutual inhibition are kept constant ($\alpha$ and $\beta$ in Supplementary Material XXX). However, in line with [@Endress-TP-Model], I used different forgetting rates ($\lambda_{act}$ in Supplementary Material XXX) between `r toString (L_ACT)`. With exponential forgetting, a forgetting rate of 1 means that the activation completely disappears on the next time step (in the absence of excitatory input), a forgetting rate of zero means no forgetting at all, while a forgetting rate of .5 implies the activation is halved on the next time step (again, in the absence of excitatory input).[^interpretation_of_decay]
+
+[^interpretation_of_decay]: While I use the label "decay", I do not claim that "decay" reflects a psychological processes. The current implementation uses decay as a mechanism to limit activations in time, but the same effect could likely be obtained through inhibitory interactions or other mechanisms. 
+
+
+```{r basic-experiment-run, echo = FALSE}
+
+fam_basic <- matrix(rep(1:(N_WORDS * N_SYLL_PER_WORD), 
+                        N_REP_PER_WORD), 
+                    byrow = TRUE, ncol = N_SYLL_PER_WORD)
+
+# 3 syllable test items
+test_items_basic <- list(1:3,        # W
+                          2:4,        # PW (BCA) 
+                          3:5        # PW (CAB)
+                          # No longer needed
+                          # c(1,4,3),   # RW (moved middle syllable)
+                          # c(1,4,9),   # CW (moved middle syllable)
+                          # c(1,19,3),  # RW (new middle syllable)
+                          # c(1,19,9)   # CW (new middle syllable)
+)
+
+# test_items_basic <- c(test_items_basic, 
+#                       lapply (test_items_basic, 
+#                               rev))
+
+# 2 syllable test items as in Flo et al. 
+test_items_basic_2syll <- list(1:2,   # W
+                               2:3)   # PW (BCA)
+
+
+# Added June 24th, 2023 for revision in Dev Sci
+# Additional test items for FLo et al,. 2022
+# "We then looked for ERPs components related to TPs violations by comparing heard triplets (Words AiBiCi and Part-words BiCiAk) vs. non-heard triplets (Edge-words AiBiCk and Non-words BiCiAi), but we found no significant difference" 
+
+test_items_basic_3syll_flo <- list(1:3, # W
+                                   2:4, # PW (BCA)
+                                   c(1, 2, 6), # Edge word
+                                   c(2, 3, 1)) # Non-word 
+
+# End added June 24th, 2023 for revision in Dev Sci
+
+
+
+# We test-items in two ways: by recording the activation in the test-items themselves
+# and by recording the activation in the entire network (_global)
+# We report only the global activation
+
+# For 3 syllable test items
+test_act_sum_basic_list <- list()
+test_act_sum_basic_global_list <- list()
+
+# For 2 syllable test items
+test_act_sum_basic_2syll_list <- list()
+test_act_sum_basic_2syll_global_list <- list()
+
+# Added June 24th, 2023 for revision in Dev Sci
+# Additional test items for FLo et al,. 2022
+test_act_sum_basic_3syll_flo_list <- list()
+test_act_sum_basic_3syll_flo_global_list <- list()
+# End added June 24th, 2023 for revision in Dev Sci
+
+spectral_ana_basic_list <- list()
+
+# Record activation around word onset after N_ITEMS_BEFORE_ACTIVATION_INSPECTION items
+dat.activation.inspection.around.word.onset <- data.frame()
+
+# Added June 24th, 2023 for revision in Dev Sci
+# Positional similarity for Henin et al., 20221
+# Record all activations for all items
+dat.all.activations.basic <- data.frame(
+    l_act = numeric(),
+    subj = numeric(), # Really the simulation number
+    item = numeric(), 
+    item.pos = numeric(), 
+    act = numeric()
+)
+# End added June 24th, 2023 for revision in Dev Sci
+
+for(current_l in L_ACT){
+    # Sample through forgetting values 
+    
+    current_test_act_sum_basic <- data.frame()
+    current_test_act_sum_basic_global <- data.frame()
+
+    current_test_act_sum_basic_2syll <- data.frame()
+    current_test_act_sum_basic_2syll_global <- data.frame()
+    
+    # Added June 24th, 2023 for revision in Dev Sci
+    # Additional test items for FLo et al,. 2022
+    current_test_act_sum_basic_3syll_flo <- data.frame()
+    current_test_act_sum_basic_3syll_flo_global <- data.frame()
+    # End added June 24th, 2023 for revision in Dev Sci
+    
+    current_spectral_ana_basic <- data.frame()
+
+    for (i in 1:N_SIM){
+        
+        # print (str_c ("Starting simulation ", i, " for decay rate ", current_l, "."))
+        
+        res <- familiarize(stream = fam_basic,
+                            l_act = current_l, a = A, b = B, noise_sd_act = NOISE_SD_ACT,
+                            r = R, l_w = L_W, noise_sd_w = NOISE_SD_W,
+                            n_neurons = 19, 
+                            return.act.and.weights = TRUE)
+        
+        
+        #plot (res$act_sum, type="l")
+        
+        # Record activation around word onset after N_ITEMS_BEFORE_ACTIVATION_INSPECTION items
+        bind_rows(
+            dat.activation.inspection.around.word.onset,
+            inspect.activation(res$act.weight.list,
+                               simplify = SIMPLIFY_ACTIVATION_INSPECTION) %>% 
+                dplyr::mutate(subj = i, l = current_l, .before = 1),
+        ) -> dat.activation.inspection.around.word.onset
+        
+        # Record results from spectral analysis 
+        current_spectral_ana_basic <- rbind(current_spectral_ana_basic,
+                                         get.act.freq.phase(res$act_sum %>% 
+                                                             # Remove the first 10 presentations of each word
+                                                             tail(3 * N_WORDS * (N_REP_PER_WORD - N_REP_PER_WORD_BURNIN)), 
+                                                         phase.units = "degrees") %>% 
+                                             dplyr::mutate(l_act = current_l,
+                                                     a = A, b = B, 
+                                                     noise_sd_act = NOISE_SD_ACT,
+                                                     n_neurons = 19,
+                                                     subj = i,
+                                                     .before = 1))
+                                                     
+                                            
+                                         
+        
+        # Record activation in test-items for 3 syllable items 
+        current_test_act_sum_basic <- rbind (current_test_act_sum_basic,
+                                             test_list (test_item_list = test_items_basic,
+                                                        w = res$w,
+                                                        l_act = current_l, a = A, b = B, 
+                                                        noise_sd_act = NOISE_SD_ACT,
+                                                        n_neurons = 19,
+                                                        return.global.act = FALSE)) 
+        
+        # Record global activation in network for 3 syllable items 
+        current_test_act_sum_basic_global <- rbind (current_test_act_sum_basic_global,
+                                             test_list (test_item_list = test_items_basic,
+                                                        w = res$w,
+                                                        l_act = current_l, a = A, b = B, 
+                                                        noise_sd_act = NOISE_SD_ACT,
+                                                        n_neurons = 19,
+                                                        return.global.act = TRUE)) 
+        
+        
+        # Record activation in test-items for 2 syllable items 
+        current_test_act_sum_basic_2syll <- rbind (current_test_act_sum_basic_2syll,
+                                             test_list (test_item_list = test_items_basic_2syll,
+                                                        w = res$w,
+                                                        l_act = current_l, a = A, b = B, 
+                                                        noise_sd_act = NOISE_SD_ACT,
+                                                        n_neurons = 19,
+                                                        return.global.act = FALSE)) 
+        
+        # Record global activation in network for 2 syllable items 
+        current_test_act_sum_basic_2syll_global <- rbind (current_test_act_sum_basic_2syll_global,
+                                             test_list (test_item_list = test_items_basic_2syll,
+                                                        w = res$w,
+                                                        l_act = current_l, a = A, b = B, 
+                                                        noise_sd_act = NOISE_SD_ACT,
+                                                        n_neurons = 19,
+                                                        return.global.act = TRUE)) 
+        
+        # Added June 24th, 2023 for revision in Dev Sci
+        # Additional test items for FLo et al,. 2022
+        current_test_act_sum_basic_3syll_flo <- rbind(current_test_act_sum_basic_3syll_flo,
+                                                      test_list (test_item_list = test_items_basic_3syll_flo,
+                                                                 w = res$w,
+                                                                 l_act = current_l, a = A, b = B, 
+                                                                 noise_sd_act = NOISE_SD_ACT,
+                                                                 n_neurons = 19,
+                                                                 return.global.act = FALSE)) 
+        
+        
+        current_test_act_sum_basic_3syll_flo_global <- rbind(current_test_act_sum_basic_3syll_flo_global,
+                                                             test_list (test_item_list = test_items_basic_3syll_flo,
+                                                                        w = res$w,
+                                                                        l_act = current_l, a = A, b = B, 
+                                                                        noise_sd_act = NOISE_SD_ACT,
+                                                                        n_neurons = 19,
+                                                                        return.global.act = TRUE)) 
+        # End added June 24th, 2023 for revision in Dev Sci
+        
+        
+        # Added June 24th, 2023 for revision in Dev Sci
+        # Positional similarity for Henin et al., 20221
+        # Record all activations for all items
+        dat.all.activations.basic <- dplyr::bind_rows(
+            dat.all.activations.basic,
+            dplyr::bind_cols(
+                data.frame(
+                    l_act = current_l,
+                    subj = i),
+                purrr::map(res$act.weight.list,
+                           ~ data.frame(item = .x$item,
+                                        act = .x$act)) %>% 
+                    purrr::list_rbind()
+            )
+        )
+        # End added June 24th, 2023 for revision in Dev Sci
+        
+
+    }
+    
+    # End of forgetting sampling loop
+    
+    spectral_ana_basic_list[[1 + length (spectral_ana_basic_list)]] <- 
+        current_spectral_ana_basic
+    
+    test_act_sum_basic_list[[1 + length (test_act_sum_basic_list)]]  <- 
+        current_test_act_sum_basic
+    
+    test_act_sum_basic_global_list[[1 + length (test_act_sum_basic_global_list)]]  <- 
+        current_test_act_sum_basic_global
+    
+    test_act_sum_basic_2syll_list[[1 + length (test_act_sum_basic_2syll_list)]]  <- 
+        current_test_act_sum_basic_2syll
+    
+    test_act_sum_basic_2syll_global_list[[1 + length (test_act_sum_basic_2syll_global_list)]]  <- 
+        current_test_act_sum_basic_2syll_global
+    
+    # Added June 24th, 2023 for revision in Dev Sci
+    # Additional test items for FLo et al,. 2022
+    test_act_sum_basic_3syll_flo_list[[1 + length(test_act_sum_basic_3syll_flo_list)]] <-
+        current_test_act_sum_basic_3syll_flo
+    
+    test_act_sum_basic_3syll_flo_global_list[[1 + length(test_act_sum_basic_3syll_flo_global_list)]] <-
+                                                 current_test_act_sum_basic_3syll_flo_global
+    # End added June 24th, 2023 for revision in Dev Sci
+}
+
+# Combine results from different forgetting rates
+# Spectral analysis
+spectral_ana_basic <- 
+    do.call (rbind,
+             spectral_ana_basic_list)
+
+# Test lists with 3 syllable words
+test_act_sum_basic <- 
+    do.call (rbind, 
+             test_act_sum_basic_list)
+
+test_act_sum_basic <- test_act_sum_basic %>% 
+    add_column(l_act = rep (L_ACT,
+                            sapply (test_act_sum_basic_list,
+                                    nrow)),
+               .before = 1
+    )
+
+test_act_sum_basic_global <- 
+    do.call (rbind, 
+             test_act_sum_basic_global_list)
+
+test_act_sum_basic_global <- test_act_sum_basic_global %>% 
+    add_column(l_act = rep (L_ACT,
+                            sapply (test_act_sum_basic_global_list,
+                                    nrow)),
+               .before = 1
+    )
+
+# Test lists with 2 syllable words
+test_act_sum_basic_2syll <- 
+    do.call (rbind, 
+             test_act_sum_basic_2syll_list)
+
+test_act_sum_basic_2syll <- test_act_sum_basic_2syll %>% 
+    add_column(l_act = rep (L_ACT,
+                            sapply (test_act_sum_basic_2syll_list,
+                                    nrow)),
+               .before = 1
+    )
+
+test_act_sum_basic_2syll_global <- 
+    do.call (rbind, 
+             test_act_sum_basic_2syll_global_list)
+
+test_act_sum_basic_2syll_global <- test_act_sum_basic_2syll_global %>% 
+    add_column(l_act = rep (L_ACT,
+                            sapply (test_act_sum_basic_2syll_global_list,
+                                    nrow)),
+               .before = 1
+    )
+
+# Added June 24th, 2023 for revision in Dev Sci
+# Additional test items for FLo et al,. 2022
+test_act_sum_basic_3syll_flo <- test_act_sum_basic_3syll_flo_list %>% 
+    purrr::list_rbind() %>% 
+    tibble::add_column(l_act = rep (L_ACT,
+                                    sapply (test_act_sum_basic_3syll_flo_list,
+                                            nrow)),
+                       .before = 1)
+
+test_act_sum_basic_3syll_flo_global <- test_act_sum_basic_3syll_flo_global_list %>% 
+    purrr::list_rbind() %>% 
+    tibble::add_column(l_act = rep (L_ACT,
+                                    sapply (test_act_sum_basic_3syll_flo_global_list,
+                                            nrow)),
+                       .before = 1)
+
+# End added June 24th, 2023 for revision in Dev Sci
+                                         
+
+
+if (!SIMPLIFY_ACTIVATION_INSPECTION){
+    # Reorder columns for activation inspection 
+    dat.activation.inspection.around.word.onset <- 
+        dat.activation.inspection.around.word.onset %>% 
+        dplyr::relocate (dplyr::starts_with("active"), .after = "n.active") %>% 
+        dplyr::relocate (dplyr::starts_with("activation"), .before = "total") 
+}
+
+# Added June 24th, 2023 for revision in Dev Sci
+# Positional similarity for Henin et al., 20221
+get.pos.from.integer <- function (x = ., divisor = NULL){
+    x %% divisor %>% 
+        ifelse(. == 0, divisor, .)
+}
+
+dat.all.activations.basic <- dat.all.activations.basic %>% 
+    dplyr::mutate(item.pos = get.pos.from.integer(item, N_SYLL_PER_WORD)) %>% 
+    dplyr::mutate(neuron = get.pos.from.integer(dplyr::row_number(), N_NEURONS))
+
+# End added June 24th, 2023 for revision in Dev Sci
+
+```
+
+
+
+
+```{r basic-experiment-global-create_diff}
+
+diff_basic_global <- cbind(
+    l_act = data.frame (l_act = test_act_sum_basic_global$l_act),
+    
+    # Adjacent FW TP: Words vs. Part-Words (Forward)
+    w_pw1_fw = make_diff_score(test_act_sum_basic_global,
+                               "1-2-3", "2-3-4",
+                               TRUE),
+    w_pw2_fw = make_diff_score(test_act_sum_basic_global,
+                               "1-2-3", "3-4-5",
+                               TRUE)
+    
+    # Unused 
+    # # Adjacent BW TP: Words vs. Part-Words (Backward)
+    # w_pw1_bw = make_diff_score(test_act_sum_basic_global,
+    #                            "3-2-1", "4-3-2",
+    #                            TRUE),
+    # w_pw2_bw = make_diff_score(test_act_sum_basic_global,
+    #                            "3-2-1", "5-4-3",
+    #                            TRUE),
+    # 
+    # # Non-adjacent FW TP: Rule-Words vs. Class-Words (Forward)
+    # rw_cw_fw1 = make_diff_score(test_act_sum_basic_global,
+    #                             "1-4-3", "1-4-9",
+    #                             TRUE),
+    # rw_cw_fw2 = make_diff_score(test_act_sum_basic_global,
+    #                             "1-19-3", "1-19-9",
+    #                             TRUE),
+    # 
+    # # Non-adjacent BW TP: Rule-Words vs. Class-Words (Backward)
+    # rw_cw_bw1 = make_diff_score(test_act_sum_basic_global,
+    #                             "3-4-1", "9-4-1",
+    #                             TRUE),
+    # rw_cw_bw2 = make_diff_score(test_act_sum_basic_global,
+    #                             "3-19-1", "9-19-1",
+    #                             TRUE)
+) %>%
+    as.data.frame()
+
+
+#boxplot (diff_basic, ylim=c(0, .2))
+```
+
+`r clearpage ()`
+
+# Results 
+## Preference for words over part-words
+To establish the forgetting rates at which discrimination between words and part-words (and thus learning) can be observed, I first repeat some of [@Endress-TP-Model] results. I calculated normalized difference scores of activations for words and part-words, $d = \frac{\text{Word} - \text{Part-Word}}{\text{Word} + \text{Part-Word}}$, and evaluated these difference scores in two ways. First, I comparde them to the chance level of zero using Wilcoxon tests. Second, I counted the number of simulations (representing different participants) preferring words, and evaluated this count using a binomial test. With `r N_SIM` simulations per parameter set, performance is significantly different from the chance level of 50% if at least `r (get.min.number.of.correct.trials.by.binom.test(N_SIM)/N_SIM) * 100 %>% signif (3)` % of the simulations show a preference for the target items.
+
+```{r basic-experiment-global-create-plot_diff-fw}
+selected_cols_fw <- c(
+    "w_pw1_fw", "w_pw2_fw")
+#    "rw_cw_fw1", "rw_cw_fw2")
+
+selected_cols_labels <- c(
+    w_pw1_fw = "ABC vs\nBC:D",
+    w_pw2_fw = "ABC vs\nC:DE"
+    # rw_cw_fw1 = "AGC vs\nAGF", 
+    # rw_cw_fw2 = "AXC vs\nAXF",
+    
+    # w_pw1_bw = "ABC vs\nBC:D",
+    # w_pw2_bw = "ABC vs\nC:DE",
+    # rw_cw_bw1 = "AGC vs\nAGF", 
+    # rw_cw_bw2 = "AXC vs\nAXF"
+)
+
+
+
+diff_basic_global_fw_plot <- 
+    diff_basic_global[,c("l_act",
+                  selected_cols_fw)] %>%
+    melt (id.vars = "l_act",
+          variable.name= "ItemType",
+          value.name = "d") %>%
+    ggplot(aes(x=ItemType, y=d, fill=ItemType))+
+    format_theme + 
+    remove_x_axis + 
+    labs (#title = "Forward TPs",
+          y = TeX("\\frac{Type_1 - Type_2}{Type_1 + Type_2}")) +
+#     scale_x_discrete(name = "Item Type",
+#                      breaks = 1:4,                 
+#                      labels=                         selected_cols_labels[selected_cols_fw]) + 
+    facet_wrap(~l_act, scales = "free_y") +
+    scale_fill_discrete(name = element_blank(), 
+                        labels = selected_cols_labels[selected_cols_fw]) + 
+    theme(legend.position = "bottom",
+          legend.direction = "horizontal") + 
+    # geom_violin (alpha = .5,
+    #              fill = "#5588CC",
+    #              col="#5588CC") +
+    # stat_summary(fun.data=mean_se,
+    #              geom="pointrange", color="#cc556f")
+    geom_boxplot()  
+
+diff_basic_global_fw_plot <- add_signif_to_plot(
+    diff_basic_global_fw_plot,
+    diff_basic_global,
+    selected_cols_fw)
+
+```
+
+
+```{r basic-experiment-global-evaluate_diff-fw}
+
+diff_basic_global_fw_p_values <- 
+    lapply (L_ACT,
+            function (CURRENT_L){
+                diff_basic_global %>%
+                    filter (l_act == CURRENT_L) %>% 
+                    summarize_condition(., 
+                                        selected_cols_fw,
+                                        selected_cols_labels) %>% 
+                    add_column(l_act = CURRENT_L, .before = 1)
+            }
+    ) 
+
+diff_basic_global_fw_p_values <- do.call ("rbind", 
+                                   diff_basic_global_fw_p_values )
+
+```
+
+
+```{r basic-experiment-global-create-plot_p_sim-fw}
+
+p_sim_basic_global_fw_plot <- diff_basic_global_fw_p_values %>%
+    filter (Statistic == "p.simulations") %>%
+    dplyr::select(-c("Statistic")) %>%
+        melt (id.vars = "l_act",
+          variable.name= "ItemType",
+          value.name = "P")  %>%
+    ggplot(aes(x=ItemType, y= 100 * P, fill = ItemType))+
+    format_theme + 
+    remove_x_axis + 
+    labs (#title = "Forward TPs",
+          y = "Percentage of Simulations") +
+#    scale_x_discrete(name = "Item Type",
+#                     breaks = 1:4, 
+                     #labels=selected_cols_labels[selected_cols_bw]) + 
+    facet_wrap(~l_act, scales = "fixed") + 
+    scale_fill_discrete(name = element_blank(), 
+                        labels = unname (selected_cols_labels[selected_cols_fw])) + 
+    theme(legend.position = "bottom",
+          legend.direction = "horizontal") + 
+    geom_bar(stat = "identity") + 
+    geom_abline(intercept = 
+                    get.min.number.of.correct.trials.by.binom.test(N_SIM)/N_SIM * 100, 
+                slope = 0,
+                linetype = "dashed") + 
+    geom_text (aes (label=100*P, y=5))
+
+
+```
+
+
+
+
+```{r basic-experiment-global-create-plot-combined-fw-plot, include = TRUE, fig.cap = "Results based on the global activation as a measure of the network's familiarity with the items for forgetting rates (between 0.1 and 0.9). (a) Difference scores between words and part-words. Significance is assessed based on Wilcoxon tests against the chance level of zero. (b) Percentage of simulations with a preference for words over part-words. The dashed line shows the minimum percentage of simulations that is significant based on a binomial test.", fig.height=8}
+
+
+
+ggpubr::ggarrange (diff_basic_global_fw_plot + 
+                       theme (title = element_blank()),
+                   p_sim_basic_global_fw_plot +
+                       theme (title = element_blank()), 
+                   nrow=2,
+                   labels = "auto",
+                   common.legend = TRUE,
+                   legend = "bottom") %>%
+     print.plot (p.name = "basic_global_combined_fw")
+
+```
+
+```{r basic-experiment-global-evaluate-diff-print, results='hide'}
+diff_basic_global_fw_p_values %>%
+    rename_stuff_in_tables %>%
+    mutate(Statistic = italisize_for_tex (Statistic)) %>%    
+    mutate(Statistic = italisize_for_tex (Statistic)) %>%
+    docxtools::format_engr(sigdig=3) %>%
+    knitr::kable(
+        "latex", 
+        longtable = TRUE,
+        booktabs = TRUE, 
+        escape = FALSE,
+        caption = 'Detailed results for the different forgetting rates and the word vs. part-word comparison (*ABC* vs. *BC:D* and *ABC* vs. *C:DE*), using the global activation as a measure of the network\'s familiarity with the items. $p_{Wilcoxon}$ represents the *p* value of a Wilcoxon test on the difference scores against the chance level of zero. $P_{Simulations}$ represents the proportion of simulations showing positive difference scores.') %>%
+    kableExtra::kable_styling(latex_options = c("striped", 
+#                                                "scale_down",
+                                                "repeat_header")) %>% 
+    kableExtra::kable_classic_2()
+```
+
+```{r basic-experiment-global-sign-pattern-print, results='hide'}
+get_sign_pattern_from_results(L_ACT, 
+                              diff_basic_global_fw_p_values) %>%
+    setNames(., gsub("l_act", "$\\\\lambda_a$", names(.))) %>%
+    knitr::kable(
+        "latex", 
+        longtable = FALSE,
+        booktabs = TRUE, 
+        escape = FALSE,
+        caption = 'Pattern of significance for the different forgetting rates and words vs. part-word comparisons (*ABC* vs. *BC:D* and *ABC* vs. *C:DE*), using the global activation as a measure of the network\'s familiarity with the items. +, - and 0 represent, respectively, a significant preference for the target item, a significant preference against the target item, or no significant preference, as evaluated by a binomial test. Numbers indicate the proportion of simulations preferring target-items; bold-face numbers indicate significance in a binomial test.') %>%
+    kableExtra::kable_styling(latex_options = c("striped", 
+                                                "scale_down",
+                                                "repeat_header")) %>%
+    kableExtra::kable_classic_2()
+
+```
+
+
+The results are shown in Figure \ref{fig:basic-experiment-global-create-plot-combined-fw-plot} and Table \ref{tab:basic-experiment-global-evaluate-diff-print2}. Except for low forgetting rates of up to .4, the network prefers words over part-words, with somewhat better performance for words against *C:DE* part-words, as has been observed in human participants by [@Fiser2002]. In the following, I will thus use forgetting rates between 0.4 and 0.9 to model the electrophysiological results.
+
+`r clearpage ()`
+## Electrophysiological results  
+### Activation differences within words
+I next asked whether a basic Hebbian learning model can explain periodic activity found in electrophysiological recordings [@Buiatti2009;@Batterink2017;@Flo2022;@Kabdebon2015;@Moreau2022;@Moser2021], focusing on the forgetting rates for which the network preferred words to part-words. In a first analysis, I simply recorded the total network activation after each syllable in a word had been presented. These activations were averaged for each syllable position (word-initial, word-medial and word-final) and for each participant after removing the first `r N_REP_PER_WORD_BURNIN*N_WORDS` words from the familiarization stream (during which the network was meant to learn). 
+
+As shown in Figure \ref{fig:basic-experiment-global-print-act-in-words-plot} and Table \ref{tab:basic-experiment-global-print-act-in-words-table2}, activation was highest after word-final syllables (though not for very low forgetting rates for which I did not observe learning in the first place). As a result, a simple Hebbian learning model can account for rhythmic activity in electrophysiological recordings with a period equivalent to the word duration. Critically, and as mentioned above, while previous electrophysiological responses to statistical structured streams were interpreted in terms of a response to word onsets [@Abla2008;@Cunillera2006;@Kudo2011;@Sanders2002;@Teinonen2009], the current  results suggest an alternative interpretation of such effects. Rather than signalling the beginnings and ends of words, an activation maximum after the third syllable of each word might reflect the predictability of the third syllable, while a sudden drop in activation after the first syllable might indicate the lack of predictability. Importantly, such activation maxima can arise even if no word is stored in memory.
+
+The reason for which lower forgetting rates do not necessarily lead to rhythmic activity is the interplay between decay and inhibition. To assess this possibility, I recorded the number of active neurons after a burn-in phase of `r N_ITEMS_BEFORE_ACTIVATION_INSPECTION` items.  As shown in Table \ref{tab:inspect-number-of-active-neurons-print2} and Figure \ref{fig:inspect-number-of-active-neurons-plot2}, more neurons remain active at any point in time when the decay rate is lower, and might thus inhibit other neurons. When decay limits the effect of residual inhibitory input from other neurons, the pattern of connections between neurons then enables the network to exhibit periodic activity.
+
+
+```{r basic-experiment-global-print-act-in-words-plot, fig.cap = "Average total network activation for different syllable positions during the familiarization with a stream following cite{Saffran-Science}. The facets show different forgetting rates. The results reflect the network behavior after the first 50 presentations of each word."}
+
+spectral_ana_basic %>% 
+    filter (l_act >= 0.4) %>%
+    filter (l_act < 1) %>% 
+    pivot_longer(starts_with("act.s"),
+                 names_to = "syllable",
+                 values_to = "act") %>% 
+    mutate (syllable = str_remove(syllable, "act.")) %>% 
+    mutate (syllable = factor (syllable)) %>% 
+    mutate (l_act = factor (l_act)) %>% 
+    ggplot (aes (x=syllable, y = act)) + 
+    theme_linedraw(14) + 
+    geom_violin (alpha = .5,
+                 fill = "#5588CC",
+                 col="#5588CC") +
+    scale_x_discrete("Syllable",
+                     labels = ~ str_replace (.x, "^s(\\d)", "$\\\\sigma_\\1$") %>% 
+                         TeX,
+                         #str_wrap(.x, 15),
+                     guide = guide_axis(angle = 0)) +
+    scale_y_continuous("Average activation") +# ,x limits = 0:1) + 
+    stat_summary(fun.data=mean_se, 
+                 geom="pointrange", color="#cc556f")  +
+    facet_wrap(l_act ~ ., scales = "free_y")
+
+```
+
+```{r basic-experiment-global-print-act-in-words-table, results='hide'}
+
+spectral_ana_basic %>% 
+    dplyr::select (l_act, starts_with("act")) %>% 
+    mutate (d.s2s1 = act.s2 - act.s1,
+            d.s3s2 = act.s3 - act.s2,
+            d.s3s1 = act.s3 - act.s1) %>% 
+    group_by(l_act) %>% 
+    dplyr::summarize (across (starts_with("d"),
+                              list (M = mean,
+                                    SE = se,
+                                    p = ~ wilcox.p (.x, mu = 0)))) %>% 
+    filter (l_act >= .4) %>%
+    filter (l_act < 1) %>% 
+    kable (caption = "Difference scores between syllable activations in different positions. P values reflect a Wilcoxon test against the chance level of zero.",
+           col.names = c("$\\Lambda$", str_remove (names (.)[-1], "^.*_")),
+           escape = FALSE,
+           booktabs = TRUE) %>% 
+    kableExtra::add_header_above(c(" " = 1, "$\\\\sigma_2 - \\\\sigma_1$" = 3, "$\\\\sigma_3 - \\\\sigma_2$" = 3, "$\\\\sigma_3 - \\\\sigma_1$" = 3),
+                                 escape = FALSE) %>% 
+    kableExtra::kable_classic_2()
+    
+
+```
+
+```{r inspect-number-of-active-neurons-print, results='hide'}
+
+#options(knitr.kable.NA = '')
+
+dat.activation.inspection.around.word.onset  %>% 
+    dplyr::group_by(l, subj) %>% 
+    summarize (n.active = mean (n.active)) %>%
+    dplyr::group_by(l) %>% 
+    summarize (M = mean (n.active), SE = se (n.active)) %>% 
+    mutate (across (2:3, round, 3)) %>% 
+    kable (caption = "Number of simultaneously  active neurons as a function of the forgetting rate.",
+           col.names = c("$\\Lambda$", "M", "SE"),
+           escape = FALSE,
+           booktabs = TRUE) %>% 
+    kableExtra::kable_classic_2()
+    
+
+
+    
+```
+```{r inspect-number-of-active-neurons-plot, fig.keep="none", fig.cap='Average number of simultaneously active neurons as a function of the forgetting rate.'}
+dat.activation.inspection.around.word.onset  %>% 
+    dplyr::group_by(l, subj) %>% 
+    summarize (n.active = mean (n.active)) %>%
+    mutate (l = factor (l)) %>% 
+    ggplot (aes (x = l, y = n.active)) +
+    theme_linedraw(14) + 
+    geom_violin (alpha = .5,
+                 fill = "#5588CC",
+                 col="#5588CC") +
+    stat_summary(fun.data=mean_se,
+                 geom="pointrange", color="#cc556f") +
+    labs (x = TeX("$\\Lambda$"), y = "Number of active neurons")
+
+```
+
+### Spectral density
+I next analyzed the frequency response of the network to the speech streams. Specifically, I estimated the spectral density of the time series corresponding to the total network activation after each time step (again after a burnin of `r N_REP_PER_WORD_BURNIN*N_WORDS` words), separately for each decay rate and simulation. I then extracted the frequency with the maximal density. As shown in Figure \ref{fig:basic-experiment-global-print-freq-phase-plot}(a), the modal frequency for decay rates of least .4 was 1/3, corresponding to a period of three syllables. These results thus suggest again that a simple Hebbian learning mechanism can entrain to statistical rhythms in the absence of memory for words. 
+
+```{r basic-experiment-global-create-freq-plot}
+spectral_ana_basic %>% 
+    dplyr::filter(l_act >= .4) %>% 
+    dplyr::mutate (l_act = factor (l_act)) %>% 
+    ggplot (aes (x=l_act, y = freq)) + 
+    theme_linedraw(14) + 
+    geom_violin (alpha = .5,
+                 fill = "#5588CC",
+                 col="#5588CC") +
+    scale_x_discrete(TeX ("Forgetting ($\\Lambda$)"),
+                     labels = ~ str_wrap(.x, 15),
+                     guide = guide_axis(angle = 60)) +
+    scale_y_continuous("Frequency") +# , limits = 0:1) + 
+    stat_summary(fun.data=mean_se, 
+                 geom="pointrange", color="#cc556f") -> 
+    plot.basic.experiment.freq
+```
+
+### Phase analysis
+The analyses of the network activations suggest that activations are strongest for word-final syllables, and that the network entrains to a periodicity of three syllables. However, the traditional interpretation of electrophysiological responses to statistical learning is that neural responses index word-initial syllables. To address this issue more directly, I calculated the phase of the network activation relative to wave forms with maxima on word-initial, word-medial and word-final syllables, respectively. Specifically, I calculated the cross-spectrum phase at the winning frequency between the total network activation and (1) three cosine reference waves with their maxima on the first, second or third syllable of a word as well as (2) a saw-tooth function with its maximum on the third syllable. As shown in Figure \ref{fig:basic-experiment-global-print-freq-phase-plot}(b) and Table \ref{tab:basic-experiment-global-phase-table2}, the activation had a small relative phase relative to the cosine with the maximum on the third syllable or the saw tooth function. In contrast the phase relative to the cosine with the word-initial maximum was around 120 degrees, while that relative to the cosine with the maximum on the second syllable was around -120 degrees. These spectral analyses thus confirm that, at least for larger decay rates, the activation increases towards the end of a word, and that the network activation is roughly in phase with a function with a maximum on the third syllable. 
+
+
+```{r basic-experiment-global-create-phase-plot}
+spectral_ana_basic %>% 
+    dplyr::filter(l_act >= .4) %>% 
+    tidyr::pivot_longer(starts_with("phase"),
+                 names_to = "reference.phase",
+                 values_to = "relative.phase") %>% 
+    dplyr::mutate (reference.phase = factor (reference.phase)) %>% 
+    dplyr::mutate (reference.phase = plyr::revalue (reference.phase, 
+                                       c("phase.cos.phase0" = "Word-initial cosine",
+                                       "phase.cos.phase1" = "Word-medial cosine",
+                                       "phase.cos.phase2" = "Word-final cosine",
+                                       "phase.sawtooth" = "Saw tooth"))) %>% 
+    dplyr::mutate (l_act = factor (l_act)) %>% 
+    ggplot (aes (x=l_act, y = relative.phase)) + 
+    theme_linedraw(14) + 
+    geom_violin (alpha = .5,
+                 fill = "#5588CC",
+                 col="#5588CC") +
+    scale_x_discrete(TeX ("Forgetting ($\\Lambda$)"),
+                     labels = ~ str_wrap(.x, 15),
+                     guide = guide_axis(angle = 60)) +
+    scale_y_continuous("Relative phase (degrees)") +# , limits = 0:1) + 
+    stat_summary(fun.data=mean_se, 
+                 geom="pointrange", color="#cc556f")  +
+    facet_grid(reference.phase ~ ., labeller = labeller (reference.phase = ~ str_wrap(.x, 12))) -> 
+    plot.basic.experiment.phase
+```
+
+```{r basic-experiment-global-phase-table, results='hide'}
+
+spectral_ana_basic %>% 
+    group_by(l_act) %>% 
+    dplyr::summarize(across(starts_with("phase"),
+                            list (M = mean,
+                                  SE = se))) %>% 
+    dplyr::filter(l_act >= .4) %>%
+    dplyr::filter(l_act < 1) %>% 
+    kable(caption = "Relative phases of the network activation relative to different syllable positions in degrees.",
+           col.names = c("$\\Lambda$", str_remove (names (.)[-1], "^.*_")),
+           escape = FALSE,
+           booktabs = TRUE) %>% 
+    kableExtra::add_header_above(c(" " = 1, "$\\\\sigma_1$" = 2, "$\\\\sigma_2$" = 2, "$\\\\sigma_3$" = 2, "Saw tooth" = 2),
+                                 escape = FALSE) %>% 
+    kableExtra::add_header_above(c(" " = 1, "Phase in degrees relative to" = 4 * 2)) %>% 
+    kableExtra::kable_classic_2()
+    
+
+```
+
+```{r basic-experiment-global-print-freq-phase-plot, fig.cap = "Spectral analysis of the total network activation during the familiarization with a stream following cite{Saffran-Science}. The results reflect the network behavior after the first 50 presentations of each word. (a) Maximal frequency as a function of the forgeting rates. For forgetting rates where learning takes place, the dominant frequency is 1/3, and thus corresponds to the word length. (b) Relative phase (in degrees) at the maximal frequency of the total network activation relative to (from top to bottom) a cosine function with its maximum at word-intial syllables, word-medial syllables and word-final syllables as well as a saw tooth function with the maximum on the third syllable. For forgetting rates where learning takes place, the total activation is in phase with a cosine with its maximum on the word-final syllable as well as with the corresponding saw tooth function."}
+
+grid.arrange.tag(plot.basic.experiment.freq,
+                 plot.basic.experiment.phase,
+                 ncol = 2)
+
+```
+
+
+
+### Memory for word onsets vs. offsets [@Flo2022]
+The results so far suggest that a simple Hebbian network can reproduce rhythmic activity in the absence of memory for words. However, [@Flo2022] suggested that neonates retain at least the first syllable of statistical defined words, if not the entire words. Specifically, they presented newborns with items starting with two syllables that occurred word-initially (*AB*...), and with items starting with a word-medial syllable (*BC*...) and observed early ERP differences between these items. 
+
+To reproduce these results, I measured the activation of the network in response to isolated, bisyllabic *AB* and *BC* test items, respectively. As shown in Figure \ref{fig:basic-experiment-global-print-act-after-2syll-plot} and Table \ref{tab:basic-experiment-global-print-difference-between-parts-of-word2}, the network activation was always greater in response to *BC* items than to *AB* items except for the largest decay rates. The reasons is presumably that a *B* syllable is strongly associated with both *A* and *C* syllables, which are associated with each other in turn. In contrast, *A* syllables are only strongly associated with *B* syllables and more weakly with *C* syllables. Upon presentation of the second syllable, second order activation should thus be greater for *BC* items than for *AB* items. Be that as it might, these analyses show that a memory-less system can reproduce differential responses to *AB* and *BC* items. 
+
+```{r basic-experiment-global-print-act-after-2syll-plot, fig.cap = "Average difference in the total network activation for the first two syllables of a word (AB) and the first to syllables of a part-word (BC) after familiarization with a stream following cite{Saffran-Science}. The results reflect the network behavior after the first 50 presentations of each word. Positive values indicate greater activation for the AB items than the BC items."}
+
+bind_rows (test_act_sum_basic_2syll %>% 
+               mutate (d = `1-2` - `2-3`) %>% 
+               mutate (act.type = "Activation in test items"),
+    test_act_sum_basic_2syll_global %>% 
+               mutate (d = `1-2` - `2-3`) %>% 
+               mutate (act.type = "Global activation")
+) %>% 
+    dplyr::filter(act.type == "Global activation") %>% 
+    dplyr::filter (l_act >= .4) %>% 
+    dplyr::mutate (l_act = factor (l_act)) %>% 
+    ggplot (aes (x = l_act, y = d)) + 
+    theme_linedraw(14) + 
+    geom_violin (alpha = .5,
+                 fill = "#5588CC",
+                 col="#5588CC") +
+    scale_x_discrete(TeX ("Forgetting ($\\Lambda$)"),
+                     labels = ~ str_wrap(.x, 15),
+                     guide = guide_axis(angle = 60)) +
+    scale_y_continuous("Activation difference AB - BC") +# , limits = 0:1) #+ 
+    stat_summary(fun.data=mean_se, 
+                 geom="pointrange", color="#cc556f") #+
+    #facet_wrap(act.type ~ ., scales = "fixed") #+
+    #ggpubr::stat_pvalue_manual()
+
+```
+
+```{r basic-experiment-global-print-difference-between-parts-of-word, results='hide'}
+# We recorded the activation when the network was exposed to the first two syllables of a word
+# and when it was exposed to the last two syllables of a word
+
+
+test_act_sum_basic_2syll_global %>% 
+    mutate (d = `1-2` - `2-3`) %>% 
+    group_by(l_act) %>% 
+    summarize (d.m = mean (d), d.se = se (d), p = wilcox.p (d)) %>% 
+    kable (caption = "Activation difference between items composed of the first two syllables of a word and the last two syllables of a word, when these bigrams were presented in isolation. Positive values indicate greater activation for the AB items than the BC items. The p value reflects a two-sided Wilcoxon signed rank test against the chance level of zero",
+           col.names = c("$\\Lambda$", "M", "SE", "p"),
+           escape = FALSE,
+           booktabs = TRUE) %>% 
+    kableExtra::add_header_above(c(" " = 1, "Activation difference between AB and BC items" = 3)) %>% 
+    kableExtra::kable_classic_2()
+    
+
+    
+
+```
+
+`r clearpage ()`
+
+### Positional coding (NEW IN REVISION)
+```{r basic-similarity-by-position-make-average-activations}
+
+# Make average activation for each forgetting rate, subject, item, and neuron
+dat.all.activations.basic.m.wide <- dat.all.activations.basic %>% 
+    # Remove burnin
+    dplyr::group_by(l_act, subj) %>% 
+    dplyr::group_modify(~ .x %>% 
+                            dplyr::slice_tail(n = (N_REP_PER_WORD - N_REP_PER_WORD_BURNIN) * 
+                                                  N_WORDS * N_SYLL_PER_WORD * N_NEURONS)) %>% 
+    # Now make wide
+    dplyr::group_by(l_act, subj, item, item.pos, neuron) %>% 
+    dplyr::summarize(act = mean(act)) %>% 
+    dplyr::ungroup() %>% 
+    # Make column for each neuron
+    tidyr::pivot_wider(id_cols = c(l_act, subj, item, item.pos),
+                       names_from = neuron,
+                       names_prefix = "act",
+                       values_from = act) %>% 
+    dplyr::ungroup() %>% 
+    dplyr::arrange(l_act, subj, item)
+
+# Verify that we have 12 items for all forgetting rates and subjects)
+if(!all(dat.all.activations.basic.m.wide %>% 
+    dplyr::group_by(l_act, subj) %>% 
+    dplyr::summarize(n_items = nlevels2(item)) %>% 
+    dplyr::ungroup () %>% 
+    pull(n_items) == 12))
+    stop("We don't have 12 items for all fogetting rates and subjects. There is a problem somewhere")
+
+```    
+
+
+Other investigators used electrophysiological recordings to reveal more abstract information extracted from statistically structured sequences. For example, [@Henin2021] found that, in intracranial recordings, the representations of items sharing a sequential position within words (i.e., word-initial, word-medial or word-final) were more similar than the representations of items from different positions, and concluded that this representational similarity might support positional codes. 
+
+However, behavioral evidence suggests that such positional codes are not available after familiarizations with continuous sequences (e.g. [@Marchetto2013;@Endress-AXC;@Endress-AXC-Edge;@Endress-AXC-Review;@Pena2002]), raising the question of whether this similarity is behaviorally relevant for learning. 
+
+Here, I suggest an alternative explanation. Items in specific sequential positions share their context. For example, all word-initial syllables are surrounded by the same set of word-final syllables and vice-versa. If so, and if the context and the target syllables activate each other, one would expect a certain degree of representational overlap of syllables sharing a sequential position, without this having behavioral consequences.
+
+To evaluate this idea, I extracted the activation in all neurons in all time steps (after burn in). I then calculated, for each forgetting rate, simulated participant and syllable, the average activation in all neurons. I then calculated the cosine similarity across the representations of all syllable pairs (i.e., the normalized dot product), and calculated an average similarity for each forgetting rate, simulated participant and match type (positional match vs. non-match), and evaluated these differences with a Wilcoxon test.
+
+
+```{r basic-similarity-by-position-make-similarity}    
+
+calculate.distance <- function(dat = . , method = c("euclidian", "cosine")){
+    
+    method <- match.arg(method)
+    
+    if (method == "euclidian"){
+        
+        m.dist <- dat %>% 
+            as.matrix %>% 
+            dist(method = "euclidian") %>% 
+            as.matrix
+            
+    } else {
+        
+        m.dist <- dat %>% 
+            # las::cosine calculates similarity across columns, not rows
+            t %>% 
+            lsa::cosine()
+    }
+    
+    m.dist %>% 
+        rstatix::pull_upper_triangle() %>% 
+        # pull_upper_triangle returns strings for some reason
+        dplyr::mutate(across(everything(), as.numeric)) %>% 
+        as.data.frame %>% 
+        dplyr::rename("item1" = "rowname")
+    
+}
+
+dat.similarity.activations.basic <- dat.all.activations.basic.m.wide %>% 
+    dplyr::select(-item.pos) %>% 
+    dplyr::group_by(l_act, subj) %>% 
+    dplyr::group_modify(~ .x %>% 
+                            tibble::column_to_rownames("item") %>% 
+                            calculate.distance(method = "cosine")
+                            ) %>% 
+    tidyr::pivot_longer(as.character(1:12),
+                        names_to = "item2",
+                        values_to = "cosine",
+                        values_drop_na = TRUE) %>% 
+    dplyr::mutate(across(starts_with("item"), as.numeric)) %>% 
+    dplyr::mutate(item.pos1 = get.pos.from.integer(item1, N_SYLL_PER_WORD),
+                  item.pos2 = get.pos.from.integer(item2, N_SYLL_PER_WORD),
+                  pos.match = dplyr::case_when(
+                      item.pos1 == item.pos2 ~ "match",
+                      item.pos1 != item.pos2 ~ "non-match",
+                      # item.pos1 == 1 & item.pos2 == 2 ~ "A:B",
+                      # item.pos2 == 1 & item.pos1 == 2 ~ "A:B",
+                      # 
+                      # item.pos1 == 1 & item.pos2 == 3 ~ "A:C",
+                      # item.pos1 == 3 & item.pos2 == 1 ~ "A:C",
+                      # 
+                      # item.pos1 == 2 & item.pos2 == 3 ~ "B:C",
+                      # item.pos1 == 3 & item.pos2 == 2 ~ "B:C",
+                      TRUE ~ NA_character_),
+                  .after = "item2")
+
+```    
+    
+        
+```{r basic-similarity-by-position-do-something-with-similarity}
+dat.similarity.activations.basic %>% 
+    dplyr::group_by(l_act, subj, pos.match) %>% 
+    dplyr::summarize(cosine = mean (cosine)) %>% 
+    tidyr::pivot_wider(id_cols = c(l_act, subj),
+                names_from = pos.match,
+                values_from = cosine) %>% 
+    dplyr::mutate(d = `non-match` - `match`) %>% 
+    dplyr::group_by(l_act) %>% 
+    dplyr::summarize(N = length(d), 
+                     d.M = mean(d),
+                     d.SD = sd(d),
+                     d.SE = se(d),
+                     p = wilcox.p(d))
+
+
+
+```
+
+As shown in XXX, the similarity score for non-match pairs for significantly higher than for match pairs for all forgetting rates. The reason for the inversion of the sign of the difference with respect to [@Henin2021] is presumably the time course in the current model vs. in actual biological tissue. In the current simulations, a syllable duration is a discrete time-step. The activations reported here are thus snapshots of more continuously evolving activations. As a result, the representations of, say, word-initial and word-final syllables are bound to be relatively similar, given that these syllables excite each other. In contrast, given our localist coding scheme, there is no overlap in the representations of different word-initial or word-final syllables. 
+
+In contrast, with realistic activation time courses, the time-resolved similarity measures used by [@Henin2021] can capture the time course of the associative activation. For example, upon presentation of a word-initial syllable, such measures can capture any lingering activation of the representations of the previous word-final syllable as well as its reactivation through excitation from the word-initial syllable. I surmise that these time series make the same same-position representations more similar. 
+
+Given that, behaviorally, the positional codes do not seem to be available to actual learners, the current results also suggest that caution is required when interpreting information that can be decoded from the brain without being behaviorally relevant. To take a non-psychological example, audio recordings often contain noise from the electric grid that can be decoded for spatial and temporal localization (e.g., for forensic purposes [@Grigoras2005]). However, while this information is clearly present in the recordings, it is not relevant for the primary means by which audio information is consumed (i.e., by listening to it). Mutatis mutandis, some information might be present in neural activity simply due to the mechanics of neural processes, but whether this information is behaviorally relevant is an independent and empirical question. 
+
+### Effects of word length (NEW IN REVISION)
+
+
+```{r basic-experiment-by-n-syll-run, echo = FALSE}
+
+# Don't run this stuff, it takes 20 min even when parallized through future
+if(FALSE){
+    
+    run.single.sim.by.n.syll.per.word <- function(current_l, current_n_syll_per_word, i){    
+        
+        current_fam_basic <- matrix(rep(1:(N_WORDS * current_n_syll_per_word), 
+                                        N_REP_PER_WORD), 
+                                    byrow = TRUE, ncol = current_n_syll_per_word)
+        
+        res <- familiarize(stream = current_fam_basic,
+                           l_act = current_l, a = A, b = B, noise_sd_act = NOISE_SD_ACT,
+                           r = R, l_w = L_W, noise_sd_w = NOISE_SD_W,
+                           n_neurons = current_n_neurons, 
+                           return.act.and.weights = TRUE)
+        
+        
+        # Record results from spectral analysis 
+        get.act.freq.phase(res$act_sum %>% 
+                               # Remove the first 10 presentations of each word
+                               tail(current_n_syll_per_word * N_WORDS * (N_REP_PER_WORD - N_REP_PER_WORD_BURNIN)), 
+                           phase.units = "degrees") %>% 
+            dplyr::mutate(
+                l_act = current_l,
+                n_syll_per_word = current_n_syll_per_word,
+                a = A, b = B, 
+                noise_sd_act = NOISE_SD_ACT,
+                n_neurons = current_n_neurons,
+                subj = i,
+                .before = 1)
+        
+    }
+    
+    
+    current_n_neurons <- N_WORDS * 18
+    
+    spectral_ana_basic_by_n_syll <- 
+        expand.grid(
+            # Sample through forgetting values 
+            current_l = L_ACT,
+            # Sample through number of syllables per word 
+            current_n_syll_per_word = 3:18,
+            # Subjects
+            i = 1:N_SIM) %>% 
+        furrr::future_pmap_dfr(
+            ~ run.single.sim.by.n.syll.per.word(..1, ..2, ..3)) %>% 
+        dplyr::arrange(l_act, n_syll_per_word, subj)
+
+    
+    
+    
+    saveRDS(spectral_ana_basic_by_n_syll, file = "spectral_ana_basic_by_n_syll.RDS") 
+    
+} else {
+    
+    spectral_ana_basic_by_n_syll <- readRDS("spectral_ana_basic_by_n_syll.RDS")
+    
+}   
+
+
+```
+
+I next ask whether the network can entrain to statistical regularities irrespective of word length. Intuitively, given that the periodicity observed above arose due to the increasing cumulative excitatory input towards the ends of words, one would expect the network to be unable to track the statistical periodicity, simply because for, sufficiently long words, the activation due to earlier syllables will have disappeared one the input reaches the end of a word. 
+
+There is some evidence supporting this idea. For example, [@Benjamin2023] did not find neural entrainment to 4-syllable words in newborns (though a failure to detect entrainment might have other reasons than the word length.)
+
+To examine this issue from a computational perspective, I repeated the simulations above, but with word lengths between 3 and 18 syllables, again for the same forgetting rates as in the simulations above and `r N_SIM` simulated participants. I estimated the spectral density of the time series corresponding to the total network activation after each time step (again after a burnin of `r N_REP_PER_WORD_BURNIN*N_WORDS` words), separately for each decay rate and simulation. I then extracted the frequency with the maximal density, and averaged these frequencies across participants. 
+
+As shown in Figures \ref{fig:basic-experiment-global-by-n-syll-create-freq-plot} and \ref{fig:basic-experiment-global-by-n-syll-modal-freq-plot}, the network successfully tracked the periodicity up to a word length of up to and including 8 syllables. For 8 syllabe-words, the winning frequency was either $\frac{1}{8}$ or $\frac{1}{4}$, depending on the forgetting rate. In other words, the network extracted a periodicity whose period was a fraction of the word length. For longer words, the winning frequency was generally a fraction of the word length, with a multiplier of 2 or 3.
+
+```{r basic-experiment-global-by-n-syll-create-freq-plot, fig.cap = "XXX"}
+spectral_ana_basic_by_n_syll %>% 
+    dplyr::filter(l_act >= .4) %>% 
+    dplyr::mutate (l_act = factor (l_act)) %>% 
+    ggplot (aes (x=l_act, y = freq)) + 
+    theme_linedraw(14) + 
+    geom_violin (alpha = .5,
+                 fill = "#5588CC",
+                 col="#5588CC") +
+    scale_x_discrete(TeX ("Forgetting ($\\Lambda$)"),
+                     labels = ~ str_wrap(.x, 15),
+                     guide = guide_axis(angle = 60)) +
+    scale_y_continuous("Frequency") +# , limits = 0:1) + 
+    stat_summary(fun.data=mean_se, 
+                 geom="pointrange", color="#cc556f") +
+    facet_wrap(. ~ n_syll_per_word)
+
+ 
+```
+
+```{r basic-experiment-global-by-n-syll-modal-freq-plot, fig.cap = "Modal frequency"}
+spectral_ana_basic_by_n_syll %>% 
+    dplyr::filter(l_act >= .4) %>% 
+    dplyr::group_by(l_act, n_syll_per_word) %>% 
+    dplyr::summarize(freq = mean(freq)) %>% 
+    dplyr::filter(freq > 0) %>% 
+    dplyr::group_by(n_syll_per_word, freq) %>% 
+    dplyr::summarize(N = n()) %>% 
+    dplyr::slice_max(N, n = 1) %>% 
+    ggplot(aes(x = n_syll_per_word, y = freq)) +
+    theme_linedraw(14) + 
+    geom_point() + 
+    geom_line() + 
+    labs(x = TeX("$N_\\sigma$ / word"),
+         y = "Most frequent frequencies")
+    
+    
+```
+
+
+
+### Additional Flo stuff (non-word) TO APPENDIX (NEW IN REVISION)
+
+10. The Hebbian model nicely explains the early effect we found between ABx and BCx sequences in Fló et al. 2022. Interestingly, this effect we attributed to an initial syllable effect can arise from associative learning, which might also explain why it is so labile (for example, we do not see it in Benjamin et al. when the pauses marked word boundaries, maybe the pause prevents associative learning from having the same effect?). Nevertheless, I am not convinced associative learning can explain all the effects. In Fló et al. 2022, we do not find a difference between test words present in the stream (ABC, BCA’) and test words not present in the stream (ABC’, BCA). What would the Hebbian model predict?
+
+
+(Words AiBiCi and Part-words BiCiAk) vs. 
+FW TPS (1, 1) (1, 1/3)
+Non-Adjacent 1, 1/3
+BW TPS (1, 1) (1/3, 1)
+
+non-heard triplets (Edge-words AiBiCk and Non-words BiCiAi), 
+FW TPS (1, 0) (1, 0)
+Non-Adjacent 0, 0
+BW TPS (1, 1) (1/3, 1)
+
+but the non-adjacent syllables occurr adjacently!
+
+
+```{r basic-experiment-global-print-act-3syll-flo-plot, fig.cap = "XXX Average difference in the total network activation for the first two syllables of a word (AB) and the first to syllables of a part-word (BC) after familiarization with a stream following cite{Saffran-Science}. The results reflect the network behavior after the first 50 presentations of each word. Positive values indicate greater activation for the AB items than the BC items."}
+
+bind_rows (test_act_sum_basic_3syll_flo %>% 
+               dplyr::mutate (d = ((`1-2-3` + `2-3-4`) - (`1-2-6` + `2-3-1`)) / 2) %>% 
+               dplyr::mutate (act.type = "Activation in test items"),
+           test_act_sum_basic_3syll_flo_global %>% 
+               dplyr::mutate (d = ((`1-2-3` + `2-3-4`) - (`1-2-6` + `2-3-1`)) / 2) %>% 
+               dplyr::mutate (act.type = "Global activation")
+) %>% 
+    dplyr::filter(act.type == "Global activation") %>% 
+    #dplyr::filter (l_act >= .4) %>% 
+    dplyr::mutate (l_act = factor (l_act)) %>% 
+    ggplot (aes (x = l_act, y = d)) + 
+    theme_linedraw(14) + 
+    geom_violin (alpha = .5,
+                 fill = "#5588CC",
+                 col="#5588CC") +
+    scale_x_discrete(TeX ("Forgetting ($\\Lambda$)"),
+                     labels = ~ str_wrap(.x, 15),
+                     guide = guide_axis(angle = 60)) +
+    scale_y_continuous("Activation difference TYPE1 (update) - TYPE 2(Update)") +# , limits = 0:1) #+ 
+    stat_summary(fun.data=mean_se, 
+                 geom="pointrange", color="#cc556f") #+
+#facet_wrap(act.type ~ ., scales = "fixed") #+
+#ggpubr::stat_pvalue_manual()
+
+```
+
+```{r basic-experiment-global-print-difference-between-3syll-items-from-flo, results='hide'}
+# We recorded the activation when the network was exposed to the first two syllables of a word
+# and when it was exposed to the last two syllables of a word
+
+
+test_act_sum_basic_3syll_flo_global %>% 
+    dplyr::mutate (d = ((`1-2-3` + `2-3-4`) - (`1-2-6` + `2-3-1`)) / 2) %>% 
+    group_by(l_act) %>% 
+    summarize (d.m = mean (d), d.se = se (d), p = wilcox.p (d)) %>% 
+    kable (caption = "XXX Activation difference between items composed of the first two syllables of a word and the last two syllables of a word, when these bigrams were presented in isolation. Positive values indicate greater activation for the AB items than the BC items. The p value reflects a two-sided Wilcoxon signed rank test against the chance level of zero",
+           col.names = c("$\\Lambda$", "M", "SE", "p"),
+           escape = FALSE,
+           booktabs = TRUE) %>% 
+    kableExtra::add_header_above(c(" " = 1, "Activation difference between AB and BC items" = 3)) %>% 
+    kableExtra::kable_classic_2()
+
+
+
+
+```
+
+
+
+`r clearpage ()`
+
+# Discussion
+To acquire the words of their native language, learners need to extract them from fluent speech, and might use co-occurrence statistics such as TPs to do so. If so, high-TP items should be stored in memory for later use as words. Strong evidence in favor of this possibility comes from electrophysiology, where rhythmic activity has been observed in response to statistically structured sequences. In the time domain, different authors have observed amplitude peaks around the boundaries of statistically defined words [@Abla2008;@Cunillera2006;@Kudo2011;@Sanders2002;@Teinonen2009]; in the frequency domain, a frequency response with a period of the word duration emerges as participants learn the statistical structure of the speech stream [@Buiatti2009;@Batterink2017;@Flo2022;@Kabdebon2015;@Moreau2022;@Moser2021].
+
+Here, I show that such results can be explained by a simple Hebbian learning model. When exposed to statistically structured sequences, the network activation increased towards the end of words due to increased excitatory input from second order associations. As a result, the network exhibits rhythmic activity with a period of a word duration. Critically, given that the network could reproduce these results in the absence of memory representations for words, earlier electrophysiological results might also index the statistical predictability of syllables rather than the acquisition of coherent units such as words. For example, and as mentioned above, N400 effects observed in statistical learning tasks [@Abla2008;@Cunillera2006;@Kudo2011;@Sanders2002;@Teinonen2009] might not index the onset of words, but rather the lack of predictability of word-initial syllables (or the increased predictability of word-final syllables). This would also be more consistent with the initial description of the N400 component as an ERP component that indexes *unpredictable* events [@Kutas2000].
+
+As mention in the introduction, the view that statistical learning does not necessarily lead to storage in declarative memory memory is consistent with long-established dissociations between declarative memory and implicit learning [@Cohen1980; @Finn2016; @Graf1984, @Knowlton1996a; @Poldrack2001; @Squire1992]. It is also consistent with a variety of behavioral results 
+(see [@Endress2020, @Endress-stat-recall] for critical reviews), including behavioral preferences for unattested high-TP items [@Endress-Action-Axc; @Endress-Phantoms-Vision; @Endress-Phantoms; @Jones2007; @Turk-Browne-reversal]), and the inability of adult learners to repeat back words from familiarization streams with as few as four words[@Endress-stat-recall].
+
+
+To identify words in fluent speech, learners might thus need to rely on other cues, including using known words as cues to word boundaries for other words [@Bortfeld2005;@Brent2001;@Mersad2012], paying attention to beginnings and ends of utterances [@Monaghan2010;@Seidl2008;@Shukla2007], phonotactic regularities [@McQueen1998] and universal aspects of prosody [@Brentari2011;@Christophe2001;@Endress-cross-seg;@Pilon1981]. Computational results suggest that such cues are promising, given that a computational model attending to utterance edges showed excellent segmentation and word-learning abilities [@Monaghan2010].
+
+In contrast, statistical learning might well be  important for predicting events across time [@Endress-stat-recall; @Morgan2019; @Sherman2020; @Turk-Browne2010; @Verosky2021] and space [@Theeuwes2022], an ability that is clearly critical for mature language processing [@Levy2008; @Trueswell1999] (as well as many other processes [@Clark2013; @Friston2010; @Keller2018]). This suggests the possibility that predictive processing might also be crucial for word learning, but it is an important topic for further research to find out how predictive processing interacts with language acquisition.
+
+
+`r clearpage ()`
+
+# Supplementary Information
+
+## Supplementary Information 1: Model definition
+The activation of the $i^{th}$ unit is given by
+
+$$
+\dot{x_i} = -\lambda_a x_i + \alpha \sum_{j \neq i} w_{ij} F(x_j) - \beta \sum_{j \neq i} F(x_j) + \text{noise}
+$$
+
+where $F(x)$ is some activation function. The current simulations use the function $F(x) = \frac{x}{1 + x}$. The first term represents exponential forgetting with a time constant of $\lambda_a$, the second term activation from other units, and the third term inhibition among items to keep the overall activation in a reasonable range.
+
+The weights $w_{ij}$ are updated using a Hebbian learning rule
+
+$$
+\dot{w}_{ij} = - \lambda_w w_{ij} + \rho F(x_i) F(x_j) 
+$$
+
+$\lambda_w$ is the time constant of forgetting (which I set to zero in the current simulations) while $\rho$ is the learning rate.
+
+A discrete version of the activation equation is given by 
+
+$$
+x_i (t+1) = x_i (t) - \lambda_a x_i(t) + \alpha \sum_{j \neq i} w_{ij} F(x_j) - \beta \sum_{j \neq i} F(x_j) + \text{noise}
+$$
+
+While the time step is arbitrary in the absence of external input (see [@Endress-Catastrophic-Interference] for a proof), I use the duration of individual units (e.g., syllables, visual symbols etc.) as the time unit in the discretization as associative learning is generally invariant under temporal scaling of the experiment [@Gallistel2000PsychRev;@Gallistel2001b]. Further, while only excitatory connections are tuned by learning in our model, the same effect could be obtained by tuning inhibition, for example through tunable disinhibitory interneurons [@Letzkus2011]. Here, I simply focus on the result that a fairly generic network architecture accounts for rhythmic network activity in response to statistically structured sequences.
+
+The discrete updating rule for the weights is 
+
+$$
+w_{ij} (t+1) = w_{ij} (t) - \lambda_w w_{ij} (t) + \rho F(x_i) F(x_j) 
+$$
+
+Simulation parameters are listed in Table \ref{tab:params}. An *R* implementation is available at XXX.
+
+```{r list-parameters2, ref.label='list-parameters', echo=FALSE, results='markup', caption='Simulation parameters. Delete in paper'}
+```
+
+`r clearpage()`
+
+## Supplementary Information 2: Detailed results 
+### Activation differences between words and part-words
+Table \ref{tab:basic-experiment-global-evaluate-diff-print2} provides detailed results for the simulations in terms of descriptive statistics and statistical tests for the simulation testing the recognition of words and part-words.
+
+
+```{r basic-experiment-global-evaluate-diff-print2, ref.label='basic-experiment-global-evaluate-diff-print', echo=FALSE, results='markup'}
+
+```
+
+`r clearpage()`
+
+### Electrophysiological results
+#### Activation differences within words.
+Table \ref{tab:basic-experiment-global-print-act-in-words-table2} shows activation differences between pairs of neurons in different positions within words.
+
+
+```{r basic-experiment-global-print-act-in-words-table2, ref.label='basic-experiment-global-print-act-in-words-table', echo=FALSE, results='markup'}
+```
+
+`r clearpage()`
+
+#### Number of active neurons
+Table \ref{tab:inspect-number-of-active-neurons-print2} and Figure \ref{fig:inspect-number-of-active-neurons-plot2} show the number of simultaneously active neurons as a function of the forgetting rate.
+
+
+```{r inspect-number-of-active-neurons-print2, ref.label='inspect-number-of-active-neurons-print', echo=FALSE, results='markup'}
+```
+
+```{r inspect-number-of-active-neurons-plot2, ref.label='inspect-number-of-active-neurons-plot', echo=FALSE, results='markup', fig.cap='Average number of simultaneously active neurons as a function of the forgetting rate.'}
+```
+
+`r clearpage()`
+
+### Spectral density
+
+### Phase analysis
+Table \ref{tab:basic-experiment-global-phase-table2} shows the descriptives of the relative phase of the network activation relative to the different syllable positions.
+
+```{r basic-experiment-global-phase-table2, ref.label='basic-experiment-global-phase-table', echo=FALSE, results='markup'}
+```
+
+`r clearpage()`
+
+### Memory for word-onsets vs. offsets
+Table \ref{tab:basic-experiment-global-print-difference-between-parts-of-word2} shows the descriptives of activation differences between syllable bigrams at word onsets and word offsets, respectively.
+
+```{r basic-experiment-global-print-difference-between-parts-of-word2, ref.label='basic-experiment-global-print-difference-between-parts-of-word', echo=FALSE, results='markup'}
+```
