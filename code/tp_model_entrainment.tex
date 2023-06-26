@@ -5,16 +5,19 @@
 \documentclass[
 ]{article}
 \usepackage{amsmath,amssymb}
-\usepackage{lmodern}
 \usepackage{iftex}
 \ifPDFTeX
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
   \usepackage{textcomp} % provide euro and other symbols
 \else % if luatex or xetex
-  \usepackage{unicode-math}
+  \usepackage{unicode-math} % this also loads fontspec
   \defaultfontfeatures{Scale=MatchLowercase}
   \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
 \fi
 % Use upquote if available, for straight quotes in verbatim environments
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
@@ -72,7 +75,7 @@
 \bibliographystyle{plainnat}
 \IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
-\urlstyle{same} % disable monospaced font for URLs
+\urlstyle{same}
 \hypersetup{
   pdftitle={Hebbian learning can explain rhythmic neural entrainment to statistical regularities},
   pdfauthor={Ansgar D. Endress, City, University of London},
@@ -579,6 +582,172 @@ differential responses to \emph{AB} and \emph{BC} items.
 
 \clearpage
 
+\hypertarget{positional-coding-new-in-revision}{%
+\subsubsection{Positional coding (NEW IN
+REVISION)}\label{positional-coding-new-in-revision}}
+
+Other investigators used electrophysiological recordings to reveal more
+abstract information extracted from statistically structured sequences.
+For example, \citep{Henin2021} found that, in intracranial recordings,
+the representations of items sharing a sequential position within words
+(i.e., word-initial, word-medial or word-final) were more similar than
+the representations of items from different positions, and concluded
+that this representational similarity might support positional codes.
+
+However, behavioral evidence suggests that such positional codes are not
+available after familiarizations with continuous sequences (e.g.
+\citep{Marchetto2013, Endress-AXC, Endress-AXC-Edge, Endress-AXC-Review, Pena2002}),
+raising the question of whether this similarity is behaviorally relevant
+for learning.
+
+Here, I suggest an alternative explanation. Items in specific sequential
+positions share their context. For example, all word-initial syllables
+are surrounded by the same set of word-final syllables and vice-versa.
+If so, and if the context and the target syllables activate each other,
+one would expect a certain degree of representational overlap of
+syllables sharing a sequential position, without this having behavioral
+consequences.
+
+To evaluate this idea, I extracted the activation in all neurons in all
+time steps (after burn in). I then calculated, for each forgetting rate,
+simulated participant and syllable, the average activation in all
+neurons. I then calculated the cosine similarity across the
+representations of all syllable pairs (i.e., the normalized dot
+product), and calculated an average similarity for each forgetting rate,
+simulated participant and match type (positional match vs.~non-match),
+and evaluated these differences with a Wilcoxon test.
+
+\begin{verbatim}
+## # A tibble: 9 x 6
+##   l_act     N       d.M      d.SD       d.SE        p
+##   <dbl> <int>     <dbl>     <dbl>      <dbl>    <dbl>
+## 1   0.1   100 0.0000846 0.000111  0.0000111  3.96e-18
+## 2   0.2   100 0.000161  0.000199  0.0000200  4.08e-18
+## 3   0.3   100 0.00457   0.0154    0.00155    3.96e-18
+## 4   0.4   100 0.123     0.00152   0.000153   3.96e-18
+## 5   0.5   100 0.102     0.000716  0.0000720  3.96e-18
+## 6   0.6   100 0.0718    0.000249  0.0000250  3.96e-18
+## 7   0.7   100 0.0527    0.0000576 0.00000579 3.96e-18
+## 8   0.8   100 0.0363    0.0000269 0.00000270 3.96e-18
+## 9   0.9   100 0.0182    0.0000113 0.00000114 3.96e-18
+\end{verbatim}
+
+As shown in XXX, the similarity score for non-match pairs for
+significantly higher than for match pairs for all forgetting rates. The
+reason for the inversion of the sign of the difference with respect to
+\citep{Henin2021} is presumably the time course in the current model
+vs.~in actual biological tissue. In the current simulations, a syllable
+duration is a discrete time-step. The activations reported here are thus
+snapshots of more continuously evolving activations. As a result, the
+representations of, say, word-initial and word-final syllables are bound
+to be relatively similar, given that these syllables excite each other.
+In contrast, given our localist coding scheme, there is no overlap in
+the representations of different word-initial or word-final syllables.
+
+In contrast, with realistic activation time courses, the time-resolved
+similarity measures used by \citep{Henin2021} can capture the time
+course of the associative activation. For example, upon presentation of
+a word-initial syllable, such measures can capture any lingering
+activation of the representations of the previous word-final syllable as
+well as its reactivation through excitation from the word-initial
+syllable. I surmise that these time series make the same same-position
+representations more similar.
+
+Given that, behaviorally, the positional codes do not seem to be
+available to actual learners, the current results also suggest that
+caution is required when interpreting information that can be decoded
+from the brain without being behaviorally relevant. To take a
+non-psychological example, audio recordings often contain noise from the
+electric grid that can be decoded for spatial and temporal localization
+(e.g., for forensic purposes \citep{Grigoras2005}). However, while this
+information is clearly present in the recordings, it is not relevant for
+the primary means by which audio information is consumed (i.e., by
+listening to it). Mutatis mutandis, some information might be present in
+neural activity simply due to the mechanics of neural processes, but
+whether this information is behaviorally relevant is an independent and
+empirical question.
+
+\hypertarget{effects-of-word-length-new-in-revision}{%
+\subsubsection{Effects of word length (NEW IN
+REVISION)}\label{effects-of-word-length-new-in-revision}}
+
+I next ask whether the network can entrain to statistical regularities
+irrespective of word length. Intuitively, given that the periodicity
+observed above arose due to the increasing cumulative excitatory input
+towards the ends of words, one would expect the network to be unable to
+track the statistical periodicity, simply because for, sufficiently long
+words, the activation due to earlier syllables will have disappeared one
+the input reaches the end of a word.
+
+There is some evidence supporting this idea. For example,
+\citep{Benjamin2023} did not find neural entrainment to 4-syllable words
+in newborns (though a failure to detect entrainment might have other
+reasons than the word length.)
+
+To examine this issue from a computational perspective, I repeated the
+simulations above, but with word lengths between 3 and 18 syllables,
+again for the same forgetting rates as in the simulations above and 100
+simulated participants. I estimated the spectral density of the time
+series corresponding to the total network activation after each time
+step (again after a burnin of 200 words), separately for each decay rate
+and simulation. I then extracted the frequency with the maximal density,
+and averaged these frequencies across participants.
+
+As shown in Figures
+\ref{fig:basic-experiment-global-by-n-syll-create-freq-plot} and
+\ref{fig:basic-experiment-global-by-n-syll-modal-freq-plot}, the network
+successfully tracked the periodicity up to a word length of up to and
+including 8 syllables. For 8 syllabe-words, the winning frequency was
+either \(\frac{1}{8}\) or \(\frac{1}{4}\), depending on the forgetting
+rate. In other words, the network extracted a periodicity whose period
+was a fraction of the word length. For longer words, the winning
+frequency was generally a fraction of the word length, with a multiplier
+of 2 or 3.
+
+\begin{figure}
+\includegraphics[width=1\linewidth]{tp_model_entrainment_files/figure-latex/basic-experiment-global-by-n-syll-create-freq-plot-1} \caption{XXX}\label{fig:basic-experiment-global-by-n-syll-create-freq-plot}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=1\linewidth]{tp_model_entrainment_files/figure-latex/basic-experiment-global-by-n-syll-modal-freq-plot-1} \caption{Modal frequency}\label{fig:basic-experiment-global-by-n-syll-modal-freq-plot}
+\end{figure}
+
+\hypertarget{additional-flo-stuff-non-word-to-appendix-new-in-revision}{%
+\subsubsection{Additional Flo stuff (non-word) TO APPENDIX (NEW IN
+REVISION)}\label{additional-flo-stuff-non-word-to-appendix-new-in-revision}}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{9}
+\tightlist
+\item
+  The Hebbian model nicely explains the early effect we found between
+  ABx and BCx sequences in Fló et al.~2022. Interestingly, this effect
+  we attributed to an initial syllable effect can arise from associative
+  learning, which might also explain why it is so labile (for example,
+  we do not see it in Benjamin et al.~when the pauses marked word
+  boundaries, maybe the pause prevents associative learning from having
+  the same effect?). Nevertheless, I am not convinced associative
+  learning can explain all the effects. In Fló et al.~2022, we do not
+  find a difference between test words present in the stream (ABC, BCA')
+  and test words not present in the stream (ABC', BCA). What would the
+  Hebbian model predict?
+\end{enumerate}
+
+(Words AiBiCi and Part-words BiCiAk) vs.~ FW TPS (1, 1) (1, 1/3)
+Non-Adjacent 1, 1/3 BW TPS (1, 1) (1/3, 1)
+
+non-heard triplets (Edge-words AiBiCk and Non-words BiCiAi), FW TPS (1,
+0) (1, 0) Non-Adjacent 0, 0 BW TPS (1, 1) (1/3, 1)
+
+but the non-adjacent syllables occurr adjacently!
+
+\begin{figure}
+\includegraphics[width=1\linewidth]{tp_model_entrainment_files/figure-latex/basic-experiment-global-print-act-3syll-flo-plot-1} \caption{XXX Average difference in the total network activation for the first two syllables of a word (AB) and the first to syllables of a part-word (BC) after familiarization with a stream following cite{Saffran-Science}. The results reflect the network behavior after the first 50 presentations of each word. Positive values indicate greater activation for the AB items than the BC items.}\label{fig:basic-experiment-global-print-act-3syll-flo-plot}
+\end{figure}
+
+\clearpage
+
 \hypertarget{discussion}{%
 \section{Discussion}\label{discussion}}
 
@@ -717,23 +886,22 @@ Name & Value\\
 \midrule
 A & 0.7\\
 B & 0.4\\
-current\_l & 0.9\\
 L\_ACT & 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9\\
 L\_ACT\_DEFAULT & 0.5\\
-\addlinespace
 L\_ACT\_SAMPLES & 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9\\
+\addlinespace
 L\_W & 0\\
 N\_ITEMS\_BEFORE\_ACTIVATION\_INSPECTION & 600\\
 N\_NEURONS & 19\\
 N\_REP\_PER\_WORD & 100\\
-\addlinespace
 N\_REP\_PER\_WORD\_BURNIN & 50\\
+\addlinespace
 N\_SIM & 100\\
 N\_SYLL\_PER\_WORD & 3\\
 N\_WORDS & 4\\
 NOISE\_SD\_ACT & 0.001\\
-\addlinespace
 NOISE\_SD\_W & 0\\
+\addlinespace
 R & 0.05\\
 \bottomrule
 \end{tabular}
@@ -769,46 +937,46 @@ $\lambda_a$ & Statistic & ABC vs BC:D & ABC vs C:DE\\
 \endfoot
 \bottomrule
 \endlastfoot
-\cellcolor{gray!6}{${100}\times 10^{-3}$} & \cellcolor{gray!6}{{\em M}} & \cellcolor{gray!6}{${-21.8}\times 10^{-3}$} & \cellcolor{gray!6}{${-34.8}\times 10^{-3}$}\\
-${100}\times 10^{-3}$ & {\em SE} & ${-2.19}\times 10^{-3}$ & ${-3.50}\times 10^{-3}$\\
-\cellcolor{gray!6}{${100}\times 10^{-3}$} & \cellcolor{gray!6}{$p_{Wilcoxon}$} & \cellcolor{gray!6}{${38.0}\times 10^{-3}$} & \cellcolor{gray!6}{${99.2}\times 10^{-3}$}\\
-${100}\times 10^{-3}$ & $P_{Simulations}$ & ${380}\times 10^{-3}$ & ${460}\times 10^{-3}$\\
-\cellcolor{gray!6}{${200}\times 10^{-3}$} & \cellcolor{gray!6}{{\em M}} & \cellcolor{gray!6}{${15.9}\times 10^{-3}$} & \cellcolor{gray!6}{${-42.9}\times 10^{-3}$}\\
+\cellcolor{gray!6}{${100}\times 10^{-3}$} & \cellcolor{gray!6}{{\em M}} & \cellcolor{gray!6}{${-12.5}\times 10^{-3}$} & \cellcolor{gray!6}{${-50.0}\times 10^{-3}$}\\
+${100}\times 10^{-3}$ & {\em SE} & ${-1.26}\times 10^{-3}$ & ${-5.02}\times 10^{-3}$\\
+\cellcolor{gray!6}{${100}\times 10^{-3}$} & \cellcolor{gray!6}{$p_{Wilcoxon}$} & \cellcolor{gray!6}{${985}\times 10^{-3}$} & \cellcolor{gray!6}{${68.1}\times 10^{-3}$}\\
+${100}\times 10^{-3}$ & $P_{Simulations}$ & ${540}\times 10^{-3}$ & ${450}\times 10^{-3}$\\
+\cellcolor{gray!6}{${200}\times 10^{-3}$} & \cellcolor{gray!6}{{\em M}} & \cellcolor{gray!6}{${-7.60}\times 10^{-3}$} & \cellcolor{gray!6}{${-45.2}\times 10^{-3}$}\\
 \addlinespace
-${200}\times 10^{-3}$ & {\em SE} & ${1.60}\times 10^{-3}$ & ${-4.31}\times 10^{-3}$\\
-\cellcolor{gray!6}{${200}\times 10^{-3}$} & \cellcolor{gray!6}{$p_{Wilcoxon}$} & \cellcolor{gray!6}{${881}\times 10^{-3}$} & \cellcolor{gray!6}{${2.44}\times 10^{-3}$}\\
-${200}\times 10^{-3}$ & $P_{Simulations}$ & ${520}\times 10^{-3}$ & ${410}\times 10^{-3}$\\
-\cellcolor{gray!6}{${300}\times 10^{-3}$} & \cellcolor{gray!6}{{\em M}} & \cellcolor{gray!6}{${26.8}\times 10^{-3}$} & \cellcolor{gray!6}{${-72.6}\times 10^{-3}$}\\
-${300}\times 10^{-3}$ & {\em SE} & ${2.69}\times 10^{-3}$ & ${-7.30}\times 10^{-3}$\\
+${200}\times 10^{-3}$ & {\em SE} & ${-764}\times 10^{-6}$ & ${-4.54}\times 10^{-3}$\\
+\cellcolor{gray!6}{${200}\times 10^{-3}$} & \cellcolor{gray!6}{$p_{Wilcoxon}$} & \cellcolor{gray!6}{${649}\times 10^{-3}$} & \cellcolor{gray!6}{${94.4}\times 10^{-3}$}\\
+${200}\times 10^{-3}$ & $P_{Simulations}$ & ${530}\times 10^{-3}$ & ${480}\times 10^{-3}$\\
+\cellcolor{gray!6}{${300}\times 10^{-3}$} & \cellcolor{gray!6}{{\em M}} & \cellcolor{gray!6}{${1.72}\times 10^{-3}$} & \cellcolor{gray!6}{${-39.2}\times 10^{-3}$}\\
+${300}\times 10^{-3}$ & {\em SE} & ${173}\times 10^{-6}$ & ${-3.94}\times 10^{-3}$\\
 \addlinespace
-\cellcolor{gray!6}{${300}\times 10^{-3}$} & \cellcolor{gray!6}{$p_{Wilcoxon}$} & \cellcolor{gray!6}{${595}\times 10^{-3}$} & \cellcolor{gray!6}{${27.4}\times 10^{-3}$}\\
-${300}\times 10^{-3}$ & $P_{Simulations}$ & ${410}\times 10^{-3}$ & ${540}\times 10^{-3}$\\
-\cellcolor{gray!6}{${400}\times 10^{-3}$} & \cellcolor{gray!6}{{\em M}} & \cellcolor{gray!6}{${-3.86}\times 10^{-3}$} & \cellcolor{gray!6}{${70.8}\times 10^{-3}$}\\
-${400}\times 10^{-3}$ & {\em SE} & ${-388}\times 10^{-6}$ & ${7.12}\times 10^{-3}$\\
-\cellcolor{gray!6}{${400}\times 10^{-3}$} & \cellcolor{gray!6}{$p_{Wilcoxon}$} & \cellcolor{gray!6}{${305}\times 10^{-18}$} & \cellcolor{gray!6}{${3.96}\times 10^{-18}$}\\
+\cellcolor{gray!6}{${300}\times 10^{-3}$} & \cellcolor{gray!6}{$p_{Wilcoxon}$} & \cellcolor{gray!6}{${114}\times 10^{-3}$} & \cellcolor{gray!6}{${627}\times 10^{-3}$}\\
+${300}\times 10^{-3}$ & $P_{Simulations}$ & ${420}\times 10^{-3}$ & ${600}\times 10^{-3}$\\
+\cellcolor{gray!6}{${400}\times 10^{-3}$} & \cellcolor{gray!6}{{\em M}} & \cellcolor{gray!6}{${-4.52}\times 10^{-3}$} & \cellcolor{gray!6}{${71.5}\times 10^{-3}$}\\
+${400}\times 10^{-3}$ & {\em SE} & ${-454}\times 10^{-6}$ & ${7.19}\times 10^{-3}$\\
+\cellcolor{gray!6}{${400}\times 10^{-3}$} & \cellcolor{gray!6}{$p_{Wilcoxon}$} & \cellcolor{gray!6}{${76.7}\times 10^{-18}$} & \cellcolor{gray!6}{${3.96}\times 10^{-18}$}\\
 \addlinespace
-${400}\times 10^{-3}$ & $P_{Simulations}$ & ${80.0}\times 10^{-3}$ & $1.00$\\
-\cellcolor{gray!6}{${500}\times 10^{-3}$} & \cellcolor{gray!6}{{\em M}} & \cellcolor{gray!6}{${3.88}\times 10^{-3}$} & \cellcolor{gray!6}{${63.3}\times 10^{-3}$}\\
-${500}\times 10^{-3}$ & {\em SE} & ${390}\times 10^{-6}$ & ${6.37}\times 10^{-3}$\\
-\cellcolor{gray!6}{${500}\times 10^{-3}$} & \cellcolor{gray!6}{$p_{Wilcoxon}$} & \cellcolor{gray!6}{${33.8}\times 10^{-18}$} & \cellcolor{gray!6}{${3.96}\times 10^{-18}$}\\
-${500}\times 10^{-3}$ & $P_{Simulations}$ & ${960}\times 10^{-3}$ & $1.00$\\
+${400}\times 10^{-3}$ & $P_{Simulations}$ & ${90.0}\times 10^{-3}$ & $1.00$\\
+\cellcolor{gray!6}{${500}\times 10^{-3}$} & \cellcolor{gray!6}{{\em M}} & \cellcolor{gray!6}{${3.64}\times 10^{-3}$} & \cellcolor{gray!6}{${63.3}\times 10^{-3}$}\\
+${500}\times 10^{-3}$ & {\em SE} & ${366}\times 10^{-6}$ & ${6.36}\times 10^{-3}$\\
+\cellcolor{gray!6}{${500}\times 10^{-3}$} & \cellcolor{gray!6}{$p_{Wilcoxon}$} & \cellcolor{gray!6}{${468}\times 10^{-18}$} & \cellcolor{gray!6}{${3.96}\times 10^{-18}$}\\
+${500}\times 10^{-3}$ & $P_{Simulations}$ & ${890}\times 10^{-3}$ & $1.00$\\
 \addlinespace
-\cellcolor{gray!6}{${600}\times 10^{-3}$} & \cellcolor{gray!6}{{\em M}} & \cellcolor{gray!6}{${7.56}\times 10^{-3}$} & \cellcolor{gray!6}{${50.7}\times 10^{-3}$}\\
-${600}\times 10^{-3}$ & {\em SE} & ${760}\times 10^{-6}$ & ${5.10}\times 10^{-3}$\\
+\cellcolor{gray!6}{${600}\times 10^{-3}$} & \cellcolor{gray!6}{{\em M}} & \cellcolor{gray!6}{${7.42}\times 10^{-3}$} & \cellcolor{gray!6}{${50.5}\times 10^{-3}$}\\
+${600}\times 10^{-3}$ & {\em SE} & ${746}\times 10^{-6}$ & ${5.07}\times 10^{-3}$\\
 \cellcolor{gray!6}{${600}\times 10^{-3}$} & \cellcolor{gray!6}{$p_{Wilcoxon}$} & \cellcolor{gray!6}{${3.96}\times 10^{-18}$} & \cellcolor{gray!6}{${3.96}\times 10^{-18}$}\\
 ${600}\times 10^{-3}$ & $P_{Simulations}$ & $1.00$ & $1.00$\\
-\cellcolor{gray!6}{${700}\times 10^{-3}$} & \cellcolor{gray!6}{{\em M}} & \cellcolor{gray!6}{${9.45}\times 10^{-3}$} & \cellcolor{gray!6}{${28.0}\times 10^{-3}$}\\
+\cellcolor{gray!6}{${700}\times 10^{-3}$} & \cellcolor{gray!6}{{\em M}} & \cellcolor{gray!6}{${9.46}\times 10^{-3}$} & \cellcolor{gray!6}{${28.0}\times 10^{-3}$}\\
 \addlinespace
-${700}\times 10^{-3}$ & {\em SE} & ${950}\times 10^{-6}$ & ${2.82}\times 10^{-3}$\\
+${700}\times 10^{-3}$ & {\em SE} & ${951}\times 10^{-6}$ & ${2.82}\times 10^{-3}$\\
 \cellcolor{gray!6}{${700}\times 10^{-3}$} & \cellcolor{gray!6}{$p_{Wilcoxon}$} & \cellcolor{gray!6}{${3.96}\times 10^{-18}$} & \cellcolor{gray!6}{${3.96}\times 10^{-18}$}\\
 ${700}\times 10^{-3}$ & $P_{Simulations}$ & $1.00$ & $1.00$\\
-\cellcolor{gray!6}{${800}\times 10^{-3}$} & \cellcolor{gray!6}{{\em M}} & \cellcolor{gray!6}{${9.40}\times 10^{-3}$} & \cellcolor{gray!6}{${17.1}\times 10^{-3}$}\\
-${800}\times 10^{-3}$ & {\em SE} & ${945}\times 10^{-6}$ & ${1.72}\times 10^{-3}$\\
+\cellcolor{gray!6}{${800}\times 10^{-3}$} & \cellcolor{gray!6}{{\em M}} & \cellcolor{gray!6}{${9.49}\times 10^{-3}$} & \cellcolor{gray!6}{${17.3}\times 10^{-3}$}\\
+${800}\times 10^{-3}$ & {\em SE} & ${954}\times 10^{-6}$ & ${1.74}\times 10^{-3}$\\
 \addlinespace
 \cellcolor{gray!6}{${800}\times 10^{-3}$} & \cellcolor{gray!6}{$p_{Wilcoxon}$} & \cellcolor{gray!6}{${3.96}\times 10^{-18}$} & \cellcolor{gray!6}{${3.96}\times 10^{-18}$}\\
 ${800}\times 10^{-3}$ & $P_{Simulations}$ & $1.00$ & $1.00$\\
-\cellcolor{gray!6}{${900}\times 10^{-3}$} & \cellcolor{gray!6}{{\em M}} & \cellcolor{gray!6}{${5.44}\times 10^{-3}$} & \cellcolor{gray!6}{${7.53}\times 10^{-3}$}\\
-${900}\times 10^{-3}$ & {\em SE} & ${547}\times 10^{-6}$ & ${757}\times 10^{-6}$\\
+\cellcolor{gray!6}{${900}\times 10^{-3}$} & \cellcolor{gray!6}{{\em M}} & \cellcolor{gray!6}{${5.39}\times 10^{-3}$} & \cellcolor{gray!6}{${7.56}\times 10^{-3}$}\\
+${900}\times 10^{-3}$ & {\em SE} & ${542}\times 10^{-6}$ & ${760}\times 10^{-6}$\\
 \cellcolor{gray!6}{${900}\times 10^{-3}$} & \cellcolor{gray!6}{$p_{Wilcoxon}$} & \cellcolor{gray!6}{${3.96}\times 10^{-18}$} & \cellcolor{gray!6}{${3.96}\times 10^{-18}$}\\
 \addlinespace
 ${900}\times 10^{-3}$ & $P_{Simulations}$ & $1.00$ & $1.00$\\*
@@ -838,13 +1006,13 @@ within words.
 \cmidrule(l{3pt}r{3pt}){2-4} \cmidrule(l{3pt}r{3pt}){5-7} \cmidrule(l{3pt}r{3pt}){8-10}
 $\Lambda$ & M & SE & p & M & SE & p & M & SE & p\\
 \midrule
-0.4 & -0.1767709 & 0.0006546 & 0 & 0.0707578 & 0.0009093 & 0 & -0.1060131 & 0.0013797 & 0\\
-0.5 & -0.1853090 & 0.0003695 & 0 & 0.1695923 & 0.0002698 & 0 & -0.0157167 & 0.0001679 & 0\\
-0.6 & -0.0889537 & 0.0002555 & 0 & 0.1439090 & 0.0002696 & 0 & 0.0549552 & 0.0000803 & 0\\
-0.7 & 0.0120413 & 0.0000504 & 0 & 0.0668421 & 0.0001194 & 0 & 0.0788834 & 0.0000807 & 0\\
-0.8 & 0.0237180 & 0.0000243 & 0 & 0.0322516 & 0.0000526 & 0 & 0.0559696 & 0.0000467 & 0\\
+0.4 & -0.1764595 & 0.0007211 & 0 & 0.0695458 & 0.0008207 & 0 & -0.1069137 & 0.0013255 & 0\\
+0.5 & -0.1845433 & 0.0004358 & 0 & 0.1691245 & 0.0002991 & 0 & -0.0154188 & 0.0001861 & 0\\
+0.6 & -0.0887139 & 0.0002330 & 0 & 0.1435532 & 0.0002557 & 0 & 0.0548392 & 0.0000765 & 0\\
+0.7 & 0.0121462 & 0.0000536 & 0 & 0.0667430 & 0.0001267 & 0 & 0.0788892 & 0.0000831 & 0\\
+0.8 & 0.0236909 & 0.0000262 & 0 & 0.0322496 & 0.0000619 & 0 & 0.0559405 & 0.0000507 & 0\\
 \addlinespace
-0.9 & 0.0198095 & 0.0000204 & 0 & 0.0075744 & 0.0000249 & 0 & 0.0273839 & 0.0000249 & 0\\
+0.9 & 0.0197990 & 0.0000217 & 0 & 0.0075760 & 0.0000247 & 0 & 0.0273750 & 0.0000228 & 0\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -866,13 +1034,13 @@ simultaneously active neurons as a function of the forgetting rate.
 \toprule
 $\Lambda$ & M & SE\\
 \midrule
-0.1 & 3.897 & 0.061\\
-0.2 & 3.991 & 0.029\\
-0.3 & 3.612 & 0.006\\
-0.4 & 3.200 & 0.002\\
-0.5 & 2.995 & 0.001\\
+0.1 & 3.790 & 0.058\\
+0.2 & 4.006 & 0.028\\
+0.3 & 3.611 & 0.006\\
+0.4 & 3.198 & 0.002\\
+0.5 & 2.996 & 0.001\\
 \addlinespace
-0.6 & 2.500 & 0.001\\
+0.6 & 2.499 & 0.001\\
 0.7 & 2.030 & 0.000\\
 0.8 & 2.000 & 0.000\\
 0.9 & 2.000 & 0.000\\
@@ -908,13 +1076,13 @@ the different syllable positions.
 \cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5} \cmidrule(l{3pt}r{3pt}){6-7} \cmidrule(l{3pt}r{3pt}){8-9}
 $\Lambda$ & M & SE & M & SE & M & SE & M & SE\\
 \midrule
-0.4 & 10.65114 & 5.0737440 & 112.45997 & 7.3758587 & -73.557408 & 6.3598153 & -99.853135 & 7.0339273\\
-0.5 & 55.72199 & 0.0443242 & 175.72199 & 0.0443242 & -64.278009 & 0.0443242 & -94.278009 & 0.0443242\\
-0.6 & 82.00705 & 0.0511961 & -157.99295 & 0.0511961 & -37.992953 & 0.0511961 & -67.992952 & 0.0511961\\
-0.7 & 128.41318 & 0.0445116 & -111.58682 & 0.0445116 & 8.413184 & 0.0445116 & -21.586815 & 0.0445116\\
-0.8 & 145.04820 & 0.0362621 & -94.95180 & 0.0362621 & 25.048204 & 0.0362621 & -4.951796 & 0.0362621\\
+0.4 & 19.79705 & 4.8859704 & 106.13301 & 8.3828050 & -81.304162 & 5.2661921 & -106.35356 & 6.0032660\\
+0.5 & 55.77019 & 0.0411637 & 175.77019 & 0.0411637 & -64.229806 & 0.0411637 & -94.22981 & 0.0411637\\
+0.6 & 82.00547 & 0.0427665 & -157.99453 & 0.0427665 & -37.994529 & 0.0427665 & -67.99453 & 0.0427665\\
+0.7 & 128.47145 & 0.0476116 & -111.52855 & 0.0476116 & 8.471447 & 0.0476116 & -21.52855 & 0.0476116\\
+0.8 & 145.05548 & 0.0439595 & -94.94452 & 0.0439595 & 25.055480 & 0.0439595 & -4.94452 & 0.0439595\\
 \addlinespace
-0.9 & 164.56772 & 0.0473923 & -75.43228 & 0.0473923 & 44.567719 & 0.0473923 & 14.567719 & 0.0473923\\
+0.9 & 164.59035 & 0.0490270 & -75.40966 & 0.0490270 & 44.590344 & 0.0490270 & 14.59034 & 0.0490270\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -940,16 +1108,16 @@ bigrams at word onsets and word offsets, respectively.
 \cmidrule(l{3pt}r{3pt}){2-4}
 $\Lambda$ & M & SE & p\\
 \midrule
-0.1 & 0.2826406 & 0.7313773 & 0.4280494\\
-0.2 & 0.1777287 & 0.4096324 & 0.7322656\\
-0.3 & -0.0686097 & 0.0461245 & 0.0002059\\
-0.4 & -0.1540030 & 0.0029380 & 0.0000000\\
-0.5 & -0.0651579 & 0.0004296 & 0.0000000\\
+0.1 & -0.0250175 & 0.6970091 & 0.4671000\\
+0.2 & 0.2191508 & 0.3494696 & 0.5976501\\
+0.3 & -0.1952755 & 0.0335688 & 0.0000000\\
+0.4 & -0.1590318 & 0.0031236 & 0.0000000\\
+0.5 & -0.0651194 & 0.0004283 & 0.0000000\\
 \addlinespace
-0.6 & -0.0368588 & 0.0004031 & 0.0000000\\
-0.7 & -0.0193043 & 0.0003164 & 0.0000000\\
-0.8 & -0.0101854 & 0.0002769 & 0.0000000\\
-0.9 & -0.0028198 & 0.0002854 & 0.0000000\\
+0.6 & -0.0367384 & 0.0003334 & 0.0000000\\
+0.7 & -0.0190492 & 0.0002921 & 0.0000000\\
+0.8 & -0.0105219 & 0.0003090 & 0.0000000\\
+0.9 & -0.0030480 & 0.0002854 & 0.0000000\\
 \bottomrule
 \end{tabular}
 \end{table}

@@ -1,5 +1,5 @@
 \providecommand{\noopsort}[1]{}
-\begin{thebibliography}{88}
+\begin{thebibliography}{96}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -34,6 +34,16 @@ Paul~M Bays, Victoria Singh-Curry, Nikos Gorgoraptis, Jon Driver, and Masud
   damage to human parietal cortex.
 \newblock \emph{J Neurosci}, 30:\penalty0 5968--5978, 2010.
 \newblock \doi{10.1523/JNEUROSCI.0997-10.2010}.
+
+\bibitem[Benjamin et~al.(2023)Benjamin, Fló, Palu, Naik, Melloni, and
+  Dehaene-Lambertz]{Benjamin2023}
+Lucas Benjamin, Ana Fló, Marie Palu, Shruti Naik, Lucia Melloni, and Ghislaine
+  Dehaene-Lambertz.
+\newblock Tracking transitional probabilities and segmenting auditory sequences
+  are dissociable processes in adults and neonates.
+\newblock \emph{Developmental science}, 26:\penalty0 e13300, March 2023.
+\newblock ISSN 1467-7687.
+\newblock \doi{10.1111/desc.13300}.
 
 \bibitem[Bortfeld et~al.(2005)Bortfeld, Morgan, Golinkoff, and
   Rathbun]{Bortfeld2005}
@@ -123,6 +133,20 @@ Ansgar~D. Endress.
 \newblock \emph{Acta Psychologica}, 135\penalty0 (2):\penalty0 182--190, 2010.
 \newblock \doi{10.1016/j.actpsy.2010.06.005}.
 
+\bibitem[Endress and Bonatti(2016)]{Endress-AXC-Review}
+Ansgar~D. Endress and L.~L. Bonatti.
+\newblock Words, rules, and mechanisms of language acquisition.
+\newblock \emph{Wiley Interdisciplinary Reviews: Cognitive Science}, 7\penalty0
+  (1):\penalty0 19--35, 2016.
+\newblock \doi{10.1002/wcs.1376}.
+
+\bibitem[Endress and Bonatti(2007)]{Endress-AXC}
+Ansgar~D. Endress and Luca~L. Bonatti.
+\newblock Rapid learning of syllable classes from a perceptually continuous
+  speech stream.
+\newblock \emph{Cognition}, 105\penalty0 (2):\penalty0 247--299, 2007.
+\newblock \doi{10.1016/j.cognition.2006.09.010}.
+
 \bibitem[Endress and de~Seyssel(under review)]{Endress-stat-recall}
 Ansgar~D. Endress and Maureen de~Seyssel.
 \newblock The specificity of sequential statistical learning: Statistical
@@ -150,12 +174,19 @@ Ansgar~D. Endress and A~Langus.
 \newblock \emph{Cognitive Psychology}, 92:\penalty0 37--64, 2017.
 \newblock \doi{10.1016/j.cogpsych.2016.11.004}.
 
-\bibitem[Endress and Mehler(2009)]{Endress-Phantoms}
+\bibitem[Endress and Mehler(2009{\natexlab{a}})]{Endress-AXC-Edge}
+Ansgar~D. Endress and Jacques Mehler.
+\newblock Primitive computations in speech processing.
+\newblock \emph{Quarterly Journal of Experimental Psychology}, 62\penalty0
+  (11):\penalty0 2187--2209, 2009{\natexlab{a}}.
+\newblock \doi{10.1080/17470210902783646}.
+
+\bibitem[Endress and Mehler(2009{\natexlab{b}})]{Endress-Phantoms}
 Ansgar~D. Endress and Jacques Mehler.
 \newblock The surprising power of statistical learning: When fragment knowledge
   leads to false memories of unheard words.
 \newblock \emph{Journal of Memory and Language}, 60\penalty0 (3):\penalty0
-  351--367, 2009.
+  351--367, 2009{\natexlab{b}}.
 \newblock \doi{10.1016/j.jml.2008.10.003}.
 
 \bibitem[Endress and Szab\'o(2020)]{Endress-Catastrophic-Interference}
@@ -284,6 +315,15 @@ Katharine Graf-Estes, Julia~L Evans, Martha~W Alibali, and Jenny~R Saffran.
 \newblock \emph{Psychol Sci}, 18\penalty0 (3):\penalty0 254--60, 2007.
 \newblock \doi{10.1111/j.1467-9280.2007.01885.x}.
 
+\bibitem[Grigoras(2005)]{Grigoras2005}
+Catalin Grigoras.
+\newblock Digital audio recording analysis: the electric network frequency
+  (enf) criterion.
+\newblock \emph{International Journal of Speech, Language and the Law},
+  12\penalty0 (1):\penalty0 63–76, Feb. 2005.
+\newblock \doi{10.1558/sll.2005.12.1.63}.
+\newblock URL \url{https://journal.equinoxpub.com/IJSLL/article/view/9977}.
+
 \bibitem[Hauser et~al.(2001)Hauser, Newport, and Aslin]{Hauser2001}
 Marc~D Hauser, Elissa~L Newport, and Richard~N Aslin.
 \newblock Segmentation of the speech stream in a non-human primate:
@@ -296,6 +336,16 @@ Jessica~F. Hay, Bruna Pelucchi, Katharine {Graf Estes}, and Jenny~R. Saffran.
   language.
 \newblock \emph{Cogn Psychol}, 63\penalty0 (2):\penalty0 93--106, 2011.
 \newblock \doi{10.1016/j.cogpsych.2011.06.002}.
+
+\bibitem[Henin et~al.(2021)Henin, Turk-Browne, Friedman, Liu, Dugan, Flinker,
+  Doyle, Devinsky, and Melloni]{Henin2021}
+Simon Henin, Nicholas~B. Turk-Browne, Daniel Friedman, Anli Liu, Patricia
+  Dugan, Adeen Flinker, Werner Doyle, Orrin Devinsky, and Lucia Melloni.
+\newblock Learning hierarchical sequence representations across human cortex
+  and hippocampus.
+\newblock \emph{Science advances}, 7, February 2021.
+\newblock ISSN 2375-2548.
+\newblock \doi{10.1126/sciadv.abc4530}.
 
 \bibitem[Isbilen et~al.(2020)Isbilen, McCauley, Kidd, and
   Christiansen]{Isbilen2020}
@@ -398,6 +448,13 @@ Roger Levy.
 \newblock \emph{Cognition}, 106\penalty0 (3):\penalty0 1126--1177, 2008.
 \newblock \doi{10.1016/j.cognition.2007.05.006}.
 
+\bibitem[Marchetto and Bonatti(2013)]{Marchetto2013}
+Erika Marchetto and Luca~L. Bonatti.
+\newblock Words and possible words in early language acquisition.
+\newblock \emph{Cognit. Psychol.}, 67\penalty0 (3):\penalty0 130 -- 150, 2013.
+\newblock ISSN 0010-0285.
+\newblock \doi{10.1016/j.cogpsych.2013.08.001}.
+
 \bibitem[McQueen(1998)]{McQueen1998}
 James~M. McQueen.
 \newblock Segmentation of continuous speech using phonotactics.
@@ -453,6 +510,12 @@ Julia Moser, Laura Batterink, Yiwen Li~Hegner, Franziska Schleger, Christoph
 \newblock \emph{NeuroImage}, 240:\penalty0 118378, October 2021.
 \newblock ISSN 1095-9572.
 \newblock \doi{10.1016/j.neuroimage.2021.118378}.
+
+\bibitem[Pe{\~n}a et~al.(2002)Pe{\~n}a, Bonatti, Nespor, and Mehler]{Pena2002}
+Marcela Pe{\~n}a, Luca~L Bonatti, Marina Nespor, and Jacques Mehler.
+\newblock Signal-driven computations in speech processing.
+\newblock \emph{Science}, 298\penalty0 (5593):\penalty0 604--7, 2002.
+\newblock \doi{10.1126/science.1072901}.
 
 \bibitem[Perruchet(2019)]{Perruchet2019}
 Pierre Perruchet.
