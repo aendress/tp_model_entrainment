@@ -600,150 +600,123 @@ available after familiarizations with continuous sequences (e.g.
 raising the question of whether this similarity is behaviorally relevant
 for learning.
 
-Here, I suggest an alternative explanation. Items in specific sequential
-positions share their context. For example, all word-initial syllables
-are surrounded by the same set of word-final syllables and vice-versa.
-If so, and if the context and the target syllables activate each other,
-one would expect a certain degree of representational overlap of
-syllables sharing a sequential position, without this having behavioral
-consequences.
+Here, I thus suggest an alternative explanation: The positional
+similarity might be a side effect of associative processing.
+Specifically, items in the same sequential position share their context.
+For example, all word-initial syllables are surrounded by the same set
+of word-final syllables and vice-versa. If so, and if the context and
+the focal syllables activate each other, one would expect a certain
+degree of representational overlap of syllables sharing a sequential
+position, without this necessarily having behavioral consequences.
 
 To evaluate this idea, I extracted the activation in all neurons in all
 time steps (after burn in). I then calculated, for each forgetting rate,
 simulated participant and syllable, the average activation in all
-neurons. I then calculated the cosine similarity across the
-representations of all syllable pairs (i.e., the normalized dot
-product), and calculated an average similarity for each forgetting rate,
-simulated participant and match type (positional match vs.~non-match),
-and evaluated these differences with a Wilcoxon test.
+neurons. I then extracted the ``representation'' of all syllables, that
+is, the vector of activations observed after a syllable has been
+presented. I calculated the cosine similarity across the representations
+of all syllable pairs (i.e., the normalized dot product), and calculated
+an average similarity for each forgetting rate, simulated participant
+and match type (positional match vs.~non-match). Finally, I calculated,
+for each forgetting rate and simulated participant, the relative
+similarity difference for non-matching vs.~matching pairs,
+\(\frac{\text{non-match} - \text{match}}{\text{non-match} + \text{match}}\)
+and evaluated these difference scores with a Wilcoxon test against the
+chance level of zero.
 
-\begin{verbatim}
-## # A tibble: 9 x 6
-##   l_act     N       d.M      d.SD       d.SE        p
-##   <dbl> <int>     <dbl>     <dbl>      <dbl>    <dbl>
-## 1   0.1   100 0.0000846 0.000111  0.0000111  3.96e-18
-## 2   0.2   100 0.000161  0.000199  0.0000200  4.08e-18
-## 3   0.3   100 0.00457   0.0154    0.00155    3.96e-18
-## 4   0.4   100 0.123     0.00152   0.000153   3.96e-18
-## 5   0.5   100 0.102     0.000716  0.0000720  3.96e-18
-## 6   0.6   100 0.0718    0.000249  0.0000250  3.96e-18
-## 7   0.7   100 0.0527    0.0000576 0.00000579 3.96e-18
-## 8   0.8   100 0.0363    0.0000269 0.00000270 3.96e-18
-## 9   0.9   100 0.0182    0.0000113 0.00000114 3.96e-18
-\end{verbatim}
+\begin{figure}
+\includegraphics[width=1\linewidth]{tp_model_entrainment_files/figure-latex/basic-similarity-by-position-plot-difference-1} \caption{Simulations of positional codes cite{Henin2021}. Representations of syllables *not* sharing a sequential position (i.e., word-initial, word-medial, word-final) are more similar to each other than representations of syllables sharing a sequential position. The similarity was evaluated using the cosine similarity across the vectors of activation elicited by the syllables.}\label{fig:basic-similarity-by-position-plot-difference}
+\end{figure}
 
-As shown in XXX, the similarity score for non-match pairs for
-significantly higher than for match pairs for all forgetting rates. The
-reason for the inversion of the sign of the difference with respect to
-\citep{Henin2021} is presumably the time course in the current model
-vs.~in actual biological tissue. In the current simulations, a syllable
-duration is a discrete time-step. The activations reported here are thus
-snapshots of more continuously evolving activations. As a result, the
-representations of, say, word-initial and word-final syllables are bound
-to be relatively similar, given that these syllables excite each other.
-In contrast, given our localist coding scheme, there is no overlap in
-the representations of different word-initial or word-final syllables.
+As shown in Figure
+\ref{fig:basic-similarity-by-position-plot-difference} and Table
+\ref{tab:basic-similarity-by-position-print-difference2}, the similarity
+score for non-match pairs was significantly higher than for match pairs
+for all forgetting rates. The reason for the inversion of the sign of
+the difference with respect to \citep{Henin2021} is presumably the time
+course in the current model vs.~in actual biological tissue. In the
+current simulations, a syllable duration is a discrete time-step. The
+activations reported here are thus snapshots of more continuously
+evolving activations. As a result, the representations of, say,
+word-initial and word-final syllables overlap, given that these
+syllables excite each other in the same time step. In contrast, given
+the localist coding scheme used here, there is no overlap in the
+representations of syllables occupying the same sequential position.
 
 In contrast, with realistic activation time courses, the time-resolved
-similarity measures used by \citep{Henin2021} can capture the time
-course of the associative activation. For example, upon presentation of
-a word-initial syllable, such measures can capture any lingering
-activation of the representations of the previous word-final syllable as
-well as its reactivation through excitation from the word-initial
-syllable. I surmise that these time series make the same same-position
-representations more similar.
+similarity measures used by \citep{Henin2021} can capture the actual
+time course of the associative activation. For example, upon
+presentation of a word-initial syllable, such measures can capture any
+lingering activation of the representations of the previous word-final
+syllable as well as its reactivation through excitation from the
+word-initial syllable. I surmise that these time series make the same
+same-position representations more similar. Be that as it might, the
+current model can differentiate between different sequential positions.
 
 Given that, behaviorally, the positional codes do not seem to be
 available to actual learners, the current results also suggest that
 caution is required when interpreting information that can be decoded
 from the brain without being behaviorally relevant. To take a
 non-psychological example, audio recordings often contain noise from the
-electric grid that can be decoded for spatial and temporal localization
-(e.g., for forensic purposes \citep{Grigoras2005}). However, while this
-information is clearly present in the recordings, it is not relevant for
-the primary means by which audio information is consumed (i.e., by
-listening to it). Mutatis mutandis, some information might be present in
-neural activity simply due to the mechanics of neural processes, but
-whether this information is behaviorally relevant is an independent and
-empirical question.
+electric grid from which spatial and temporal localization information
+can be decoded (e.g., for forensic purposes \citep{Grigoras2005}).
+However, while this information is clearly present in the recordings, it
+is not relevant for the primary means by which audio information is
+consumed (i.e., by listening to it). Mutatis mutandis, some information
+might be present in neural activity as a side effect of the mechanics of
+neural processing, but whether this information is behaviorally relevant
+is an independent and empirical question.
 
 \hypertarget{effects-of-word-length-new-in-revision}{%
 \subsubsection{Effects of word length (NEW IN
 REVISION)}\label{effects-of-word-length-new-in-revision}}
 
-I next ask whether the network can entrain to statistical regularities
-irrespective of word length. Intuitively, given that the periodicity
-observed above arose due to the increasing cumulative excitatory input
-towards the ends of words, one would expect the network to be unable to
-track the statistical periodicity, simply because for, sufficiently long
-words, the activation due to earlier syllables will have disappeared one
-the input reaches the end of a word.
+I next asked whether the network can entrain to statistical regularities
+when the familiarization streams are composed of words of arbitrary
+length. Intuitively, given that the periodicity reported here arises due
+to the increasing cumulative excitatory input towards the ends of words,
+one would expect the network to be unable to track statistical
+periodicity for excessively long words. After all, for sufficiently long
+words, the activation from to earlier syllables will have disappeared
+once the input reaches the end of a word.
 
 There is some evidence supporting this idea. For example,
 \citep{Benjamin2023} did not find neural entrainment to 4-syllable words
 in newborns (though a failure to detect entrainment might have other
-reasons than the word length.)
+reasons than the word length.) Computationally, however, it is also
+conceivable that networks can deal with longer words, if spreading
+activation due to higher order associations are sufficient to increase
+the network activation towards the end of a word.
 
-To examine this issue from a computational perspective, I repeated the
-simulations above, but with word lengths between 3 and 18 syllables,
-again for the same forgetting rates as in the simulations above and 100
-simulated participants. I estimated the spectral density of the time
-series corresponding to the total network activation after each time
-step (again after a burnin of 200 words), separately for each decay rate
-and simulation. I then extracted the frequency with the maximal density,
-and averaged these frequencies across participants.
+To examine this issue, I repeated the simulations above, but with word
+lengths between 3 and 18 syllables, again for the same forgetting rates
+as in the simulations above and 100 simulated participants. I estimated
+the spectral density of the time series corresponding to the total
+network activation after each time step (again after a burnin of 200
+words), separately for each decay rate and simulation. I then extracted
+the frequency with the maximal density, and averaged these frequencies
+across participants.
 
 As shown in Figures
 \ref{fig:basic-experiment-global-by-n-syll-create-freq-plot} and
 \ref{fig:basic-experiment-global-by-n-syll-modal-freq-plot}, the network
 successfully tracked the periodicity up to a word length of up to and
-including 8 syllables. For 8 syllabe-words, the winning frequency was
+including 8 syllables. For 8 syllable-words, the winning frequency was
 either \(\frac{1}{8}\) or \(\frac{1}{4}\), depending on the forgetting
 rate. In other words, the network extracted a periodicity whose period
 was a fraction of the word length. For longer words, the winning
 frequency was generally a fraction of the word length, with a multiplier
 of 2 or 3.
 
-\begin{figure}
-\includegraphics[width=1\linewidth]{tp_model_entrainment_files/figure-latex/basic-experiment-global-by-n-syll-create-freq-plot-1} \caption{XXX}\label{fig:basic-experiment-global-by-n-syll-create-freq-plot}
-\end{figure}
+As a result, there seems to be a limit to how long words can be so that
+the network can entrain to a statistically induced rhythm. Here, the
+limit seems to be a word length of 8 syllables, but the specific limit
+likely depends on the interplay between the forgetting, excitation and
+inhibition parameters.\footnote{See SI XXX for other quantitive results
+  where the network makes incorrect predictions.}
 
 \begin{figure}
-\includegraphics[width=1\linewidth]{tp_model_entrainment_files/figure-latex/basic-experiment-global-by-n-syll-modal-freq-plot-1} \caption{Modal frequency}\label{fig:basic-experiment-global-by-n-syll-modal-freq-plot}
-\end{figure}
-
-\hypertarget{additional-flo-stuff-non-word-to-appendix-new-in-revision}{%
-\subsubsection{Additional Flo stuff (non-word) TO APPENDIX (NEW IN
-REVISION)}\label{additional-flo-stuff-non-word-to-appendix-new-in-revision}}
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\setcounter{enumi}{9}
-\tightlist
-\item
-  The Hebbian model nicely explains the early effect we found between
-  ABx and BCx sequences in Fló et al.~2022. Interestingly, this effect
-  we attributed to an initial syllable effect can arise from associative
-  learning, which might also explain why it is so labile (for example,
-  we do not see it in Benjamin et al.~when the pauses marked word
-  boundaries, maybe the pause prevents associative learning from having
-  the same effect?). Nevertheless, I am not convinced associative
-  learning can explain all the effects. In Fló et al.~2022, we do not
-  find a difference between test words present in the stream (ABC, BCA')
-  and test words not present in the stream (ABC', BCA). What would the
-  Hebbian model predict?
-\end{enumerate}
-
-(Words AiBiCi and Part-words BiCiAk) vs.~ FW TPS (1, 1) (1, 1/3)
-Non-Adjacent 1, 1/3 BW TPS (1, 1) (1/3, 1)
-
-non-heard triplets (Edge-words AiBiCk and Non-words BiCiAi), FW TPS (1,
-0) (1, 0) Non-Adjacent 0, 0 BW TPS (1, 1) (1/3, 1)
-
-but the non-adjacent syllables occurr adjacently!
-
-\begin{figure}
-\includegraphics[width=1\linewidth]{tp_model_entrainment_files/figure-latex/basic-experiment-global-print-act-3syll-flo-plot-1} \caption{XXX Average difference in the total network activation for the first two syllables of a word (AB) and the first to syllables of a part-word (BC) after familiarization with a stream following cite{Saffran-Science}. The results reflect the network behavior after the first 50 presentations of each word. Positive values indicate greater activation for the AB items than the BC items.}\label{fig:basic-experiment-global-print-act-3syll-flo-plot}
+\includegraphics[width=1\linewidth]{tp_model_entrainment_files/figure-latex/basic-experiment-global-by-n-syll-create-freq-plot-plot-1} \caption{Entrainment as a function of word-length. (a) Dominant frequency as a function of the forgetting rate (x-axix, $\Lambda$) and the word-length (3-18 syllables; facets). (b) Most frequent dominant frequency across forgetting rates as a function of the word-length. For words of up to and including 8 syllables, the network entrains to a frequency equivalent to the word-length. For words of 8 or more syllable, the network entrains to a multiple of that frequency.}\label{fig:basic-experiment-global-by-n-syll-create-freq-plot-plot}
 \end{figure}
 
 \clearpage
@@ -1118,6 +1091,106 @@ $\Lambda$ & M & SE & p\\
 0.7 & -0.0190492 & 0.0002921 & 0.0000000\\
 0.8 & -0.0105219 & 0.0003090 & 0.0000000\\
 0.9 & -0.0030480 & 0.0002854 & 0.0000000\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\hypertarget{positional-similarity-new-in-revision}{%
+\subsubsection{Positional similarity (NEW IN
+REVISION)}\label{positional-similarity-new-in-revision}}
+
+Table \ref{tab:basic-similarity-by-position-print-difference2} shows the
+descriptives of the relative difference in cosine similarity for pairs
+of representations mismatching and matching in the their sequential
+positions, respectively
+
+\begin{table}
+
+\caption{\label{tab:basic-similarity-by-position-print-difference2}Simulations of positional codes cite{Henin2021}. Representations of syllables *not* sharing a sequential position (i.e., word-initial, word-medial, word-final) are more similar to each other than representations of syllables sharing a sequential position. The similarity was evaluated using the cosine similarity across the vectors of activation elicited by the syllables. The p value reflects a Wilcoxon test against the chance level of zero.}
+\centering
+\begin{tabular}[t]{rrrr}
+\toprule
+\multicolumn{1}{c}{ } & \multicolumn{3}{c}{Relative cosine similarity difference \$\textbackslash{}frac\{Non-match - Match\}\{Non-match + Match\}\$} \\
+\cmidrule(l{3pt}r{3pt}){2-4}
+$\Lambda$ & M & SE & p\\
+\midrule
+0.1 & 0.0000423 & 0.0000056 & 0\\
+0.2 & 0.0000808 & 0.0000100 & 0\\
+0.3 & 0.0042055 & 0.0017344 & 0\\
+0.4 & 0.4565052 & 0.0019912 & 0\\
+0.5 & 0.6509563 & 0.0003644 & 0\\
+\addlinespace
+0.6 & 0.7219907 & 0.0002754 & 0\\
+0.7 & 0.8020529 & 0.0001526 & 0\\
+0.8 & 0.8815974 & 0.0001024 & 0\\
+0.9 & 0.9474764 & 0.0000495 & 0\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\hypertarget{heard-vs.-unheard-items-flo2022-new-in-revision}{%
+\subsubsection{\texorpdfstring{Heard vs.~unheard items \citep{Flo2022}
+(NEW IN
+REVISION)}{Heard vs.~unheard items {[}@Flo2022{]} (NEW IN REVISION)}}\label{heard-vs.-unheard-items-flo2022-new-in-revision}}
+
+While the current model provides a qualitative explanation of a number
+of statistical learning results, it is unlikely to make quantitative
+predictions. A case in point are some test items used by
+\citep{Flo2022}. Specifically, they sought ERP responses to TP
+violations by pitting hear items against non-heard items.
+
+The heard items were words (of the form \(A_iB_iC_i\)) and part-words
+(of the form \(B_iC_iA_k\)). The unheard items were edge-words (of the
+form \(A_iB_iC_k\)) and non-words (of the form \(B_iC_iA_i\)). While
+\citep{Flo2022} did not observe significant ERP differences between
+these item types, modeling this null effect likely requires quantitative
+predictions of different cues that might drive such differences (apart
+from issues associated with modeling null effects).
+
+Specifically, while the forward and backward TPs are stronger in heard
+items than in un-heard items, this description of the test items depends
+on calculating TPs at a constant lag. For example, in edge-words
+(\(A_iB_iC_k\)), the \(C_k\) syllable is associated with the other
+syllables, given that participants encountered part-words such as
+\(C_kA_iB_i\). Likewise, in non-words (\(B_iC_iA_i\)), all syllables are
+strongly associated with one another, given that the item is a scrambled
+version of a word \(A_iB_iC_i\). Depending on how learners integrate
+associations across directions (forward or backward) and lags, they
+might or might not differentiate \citep{Flo2022} heard items from their
+unheard items.
+
+In contrast to \citep{Flo2022} results, Figure
+\ref{fig:basic-experiment-global-print-act-3syll-flo2022-plot} and Table
+\ref{tab:basic-experiment-global-print-difference-between-3syll-items-from-flo2022}
+show that, with the current parameter set, the network prefers heard
+items over unheard items for forgetting rates of at least 0.4. However,
+these results likely depend on the interplay between forgetting,
+excitation, interference as well as the structure of the speech stream.
+
+\begin{figure}
+\includegraphics[width=1\linewidth]{tp_model_entrainment_files/figure-latex/basic-experiment-global-print-act-3syll-flo2022-plot-1} \caption{Average difference in the total network activation for the heard item ($A_iB_iC_i$ and $B_iC_iA_k$) vs. unheard item contrast ($A_iB_iC_k$; $B_iC_iA_i$) used by cite{Flo2022}. The results reflect the network behavior after the first 50 presentations of each word. Positive values indicate greater activation for the heard items than the unheard items.}\label{fig:basic-experiment-global-print-act-3syll-flo2022-plot}
+\end{figure}
+
+\begin{table}
+
+\caption{\label{tab:basic-experiment-global-print-difference-between-3syll-items-from-flo2022}Average difference in the total network activation for the heard item ($A_iB_iC_i$ and $B_iC_iA_k$) vs. unheard item contrast ($A_iB_iC_k$; $B_iC_iA_i$) used by cite{Flo2022}. The results reflect the network behavior after the first 50 presentations of each word. Positive values indicate greater activation for the heard items than the unheard items. The p value reflects a two-sided Wilcoxon signed rank test against the chance level of zero}
+\centering
+\begin{tabular}[t]{rrrr}
+\toprule
+\multicolumn{1}{c}{ } & \multicolumn{3}{c}{Activation difference between heard items and unheard items} \\
+\cmidrule(l{3pt}r{3pt}){2-4}
+\$\textbackslash{}Lambda\$ & M & SE & p\\
+\midrule
+0.1 & -1.853 & 2.772 & 0.641\\
+0.2 & 0.224 & 1.676 & 0.619\\
+0.3 & -0.196 & 0.267 & 0.315\\
+0.4 & 0.008 & 0.002 & 0.001\\
+0.5 & 0.060 & 0.001 & 0.000\\
+\addlinespace
+0.6 & 0.048 & 0.001 & 0.000\\
+0.7 & 0.037 & 0.000 & 0.000\\
+0.8 & 0.029 & 0.000 & 0.000\\
+0.9 & 0.018 & 0.000 & 0.000\\
 \bottomrule
 \end{tabular}
 \end{table}
