@@ -11,7 +11,7 @@ Reallocated name_tok (elt_size=4) to 40000 items from 20000.
 Reallocated name_sep_char (elt_size=1) to 40000 items from 20000.
 You've used 96 entries,
             2773 wiz_defined-function locations,
-            1347 strings with 25831 characters,
+            1347 strings with 25834 characters,
 and the built_in function-call counts, 47939 in all, are:
 = -- 4488
 > -- 2739

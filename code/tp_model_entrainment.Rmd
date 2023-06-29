@@ -365,6 +365,73 @@ test_list <- function (test_item_list,
     return (test_act_sum)
 }
 
+
+# Added June 29th, 2023 for Revision in Dev Sci
+record_activation_in_test_items <- function(test_item_list,
+                                            w,
+                                            l_act = 1, a = 1, b = 0, 
+                                            noise_sd_act = 0,
+                                            n_neurons,
+                                            wide = TRUE,
+                                            ...) {
+    # Arguments
+    #   test_item_list  List of test-items (i.e., numeric vectors)
+    #   w               Current weight matrix
+    #   l_act           Forgetting rate for activation. Default:  1
+    #   a               Excitatory coefficient. Default: 1
+    #   b               Inhibitory coefficient. Default: 0
+    #   noise_sd_act    Standard deviation of the activation noise. Default: 0
+    #   n_neurons       Number of neurons in the network.
+    #   wide            Return data frame with activations in columns? Default: TRUE
+    
+    dat.act.test.items <- data.frame(test_item = character(),
+                                     item = integer(),
+                                     act = numeric())
+    
+    for(ti in test_item_list){
+        
+        
+        ti.name <- paste (ti, collapse = "-")
+        
+        act <- abs(rnorm (n_neurons, 0, noise_sd_act))
+        
+        
+        for (item in ti){
+            
+            current_input <- make_act_vector(item, n_neurons)
+            act <- update_activation(act, res$w, current_input, 
+                                     l_act, a, b, noise_sd_act)#,
+            #...)
+            
+            dat.act.test.items <- dplyr::bind_rows(
+                dat.act.test.items,
+                data.frame(test_item = ti.name,
+                           item = item,
+                           act  = act)
+            )
+            
+        }
+        
+        
+    }   
+    
+    dat.act.test.items <- dat.act.test.items %>% 
+        dplyr::group_by(test_item, item) %>% 
+        dplyr::mutate(neuron = str_c("n", dplyr::row_number()), .before = "act")
+    
+    if(wide){
+        dat.act.test.items <- dat.act.test.items %>% 
+            tidyr::pivot_wider(id_cols = c(test_item, item),
+                               names_from = neuron,
+                               values_from = act)
+    }
+    
+    
+    return(dat.act.test.items)
+}
+
+# End added June 29th, 2023 for Revision in Dev Sci
+
 make_diff_score <- function (dat = ., 
                              col.name1,
                              col.name2,
@@ -971,43 +1038,48 @@ test_items_basic_3syll_flo <- list(1:3, # W
 # End added June 24th, 2023 for revision in Dev Sci
 
 
-
-# We test-items in two ways: by recording the activation in the test-items themselves
-# and by recording the activation in the entire network (_global)
-# We report only the global activation
-
-# For 3 syllable test items
-test_act_sum_basic_list <- list()
-test_act_sum_basic_global_list <- list()
-
-# For 2 syllable test items
-test_act_sum_basic_2syll_list <- list()
-test_act_sum_basic_2syll_global_list <- list()
-
-# Added June 24th, 2023 for revision in Dev Sci
-# Additional test items for FLo et al,. 2022
-test_act_sum_basic_3syll_flo_list <- list()
-test_act_sum_basic_3syll_flo_global_list <- list()
-# End added June 24th, 2023 for revision in Dev Sci
-
-spectral_ana_basic_list <- list()
-
-# Record activation around word onset after N_ITEMS_BEFORE_ACTIVATION_INSPECTION items
-dat.activation.inspection.around.word.onset <- data.frame()
-
-# Added June 24th, 2023 for revision in Dev Sci
-# Positional similarity for Henin et al., 20221
-# Record all activations for all items
-dat.all.activations.basic <- data.frame(
-    l_act = numeric(),
-    subj = numeric(), # Really the simulation number
-    item = numeric(), 
-    item.pos = numeric(), 
-    act = numeric()
-)
-# End added June 24th, 2023 for revision in Dev Sci
-
 if(RERUN_SIMULATIONS){
+    # We test-items in two ways: by recording the activation in the test-items themselves
+    # and by recording the activation in the entire network (_global)
+    # We report only the global activation
+    
+    # For 3 syllable test items
+    test_act_sum_basic_list <- list()
+    test_act_sum_basic_global_list <- list()
+    
+    # For 2 syllable test items
+    test_act_sum_basic_2syll_list <- list()
+    test_act_sum_basic_2syll_global_list <- list()
+    
+    # Added June 24th, 2023 for revision in Dev Sci
+    # Record the detailed activation in the test items above
+    dat.act.test.items.2syll.all.neurons <- data.frame()
+    
+    # Additional test items for FLo et al,. 2022
+    test_act_sum_basic_3syll_flo_list <- list()
+    test_act_sum_basic_3syll_flo_global_list <- list()
+    # End added June 24th, 2023 for revision in Dev Sci
+    
+    spectral_ana_basic_list <- list()
+    
+    # Record activation around word onset after N_ITEMS_BEFORE_ACTIVATION_INSPECTION items
+    dat.activation.inspection.around.word.onset <- data.frame()
+    
+    # Added June 24th, 2023 for revision in Dev Sci
+    # Positional similarity for Henin et al., 20221
+    # Record all activations for all items
+    dat.all.activations.basic <- data.frame(
+        l_act = numeric(),
+        subj = numeric(), # Really the simulation number
+        item = numeric(), 
+        item.pos = numeric(), 
+        act = numeric()
+    )
+    
+    # Record final weight
+    m.final.weights.basic <- array(dim=c(length(L_ACT), N_SIM, N_NEURONS, N_NEURONS))
+    # End added June 24th, 2023 for revision in Dev Sci
+    
     for(current_l in L_ACT){
         # Sample through forgetting values 
         
@@ -1019,6 +1091,8 @@ if(RERUN_SIMULATIONS){
         
         # Added June 24th, 2023 for revision in Dev Sci
         # Additional test items for FLo et al,. 2022
+        
+        
         current_test_act_sum_basic_3syll_flo <- data.frame()
         current_test_act_sum_basic_3syll_flo_global <- data.frame()
         # End added June 24th, 2023 for revision in Dev Sci
@@ -1099,7 +1173,26 @@ if(RERUN_SIMULATIONS){
                                                                          n_neurons = 19,
                                                                          return.global.act = TRUE)) 
             
+            # Added June 29th, 2023 for Revision in Dev Sci
+            # Record detailed activation in network for 2 syllable items 
+            dat.act.test.items.2syll.all.neurons <- dplyr::bind_rows(
+                dat.act.test.items.2syll.all.neurons,
+                dplyr::bind_cols(data.frame(
+                   l.act = current_l,
+                   subj = i),
+                   record_activation_in_test_items(test_item_list = test_items_basic_2syll,
+                                                   w = res$w,
+                                                   l_act = current_l, a = A, b = B, 
+                                                   noise_sd_act = NOISE_SD_ACT,
+                                                   n_neurons = 19,
+                                                   wide = TRUE))) 
+            
+            # End Added June 29th, 2023 for Revision in Dev Sci
+            
             # Added June 24th, 2023 for revision in Dev Sci
+            # Record final weight
+            m.final.weights.basic[which(L_ACT %in% current_l), i, ,] <- res$w
+            
             # Additional test items for FLo et al,. 2022
             current_test_act_sum_basic_3syll_flo <- rbind(current_test_act_sum_basic_3syll_flo,
                                                           test_list (test_item_list = test_items_basic_3syll_flo,
@@ -1261,16 +1354,18 @@ if(RERUN_SIMULATIONS){
         test_act_sum_basic_global, 
         test_act_sum_basic_2syll, 
         test_act_sum_basic_2syll_global, 
+        dat.act.test.items.2syll.all.neurons,
         test_act_sum_basic_3syll_flo,
         test_act_sum_basic_3syll_flo_global, 
         dat.activation.inspection.around.word.onset, 
         dat.all.activations.basic,
+        m.final.weights.basic,
     file = '../data/basic-experiment-run.rda')
-    
 } else {
     
     load(file = '../data/basic-experiment-run.rda' )
 }
+
 ```
 
 
@@ -1673,11 +1768,11 @@ grid.arrange.tag(plot.basic.experiment.freq,
 ### Memory for word onsets vs. offsets [@Flo2022]
 The results so far suggest that a simple Hebbian network can reproduce rhythmic activity in the absence of memory for words. However, [@Flo2022] suggested that neonates retain at least the first syllable of statistical defined words, if not the entire words. Specifically, they presented newborns with items starting with two syllables that occurred word-initially (*AB*...), and with items starting with a word-medial syllable (*BC*...) and observed early ERP differences between these items. 
 
-To reproduce these results, I measured the activation of the network in response to isolated, bisyllabic *AB* and *BC* test items, respectively. As shown in Figure \ref{fig:basic-experiment-global-print-act-after-2syll-plot} and Table \ref{tab:basic-experiment-global-print-difference-between-parts-of-word2}, the network activation was always greater in response to *BC* items than to *AB* items except for the largest decay rates. The reasons is presumably that a *B* syllable is strongly associated with both *A* and *C* syllables, which are associated with each other in turn. In contrast, *A* syllables are only strongly associated with *B* syllables and more weakly with *C* syllables. Upon presentation of the second syllable, second order activation should thus be greater for *BC* items than for *AB* items. Be that as it might, these analyses show that a memory-less system can reproduce differential responses to *AB* and *BC* items. 
+To reproduce these results, I measured the activation of the network in response to isolated, bisyllabic *AB* and *BC* test items, respectively. As shown in Figure \ref{fig:basic-experiment-global-print-act-after-2syll-plot} and Table \ref{tab:basic-experiment-global-print-difference-between-parts-of-word2}, the network activation was always greater in response to *BC* items than to *AB* items except for the largest decay rates. The reasons is presumably that *BC* associations are somewhat stronger than *AB* associations, thus leading to more spreading activation. Be that as it might, these analyses show that a memory-less system can reproduce differential responses to *AB* and *BC* items.
 
 ```{r basic-experiment-global-print-act-after-2syll-plot, fig.cap = "Average difference in the total network activation for the first two syllables of a word (AB) and the first to syllables of a part-word (BC) after familiarization with a stream following cite{Saffran-Science}. The results reflect the network behavior after the first 50 presentations of each word. Positive values indicate greater activation for the AB items than the BC items."}
 
-bind_rows (test_act_sum_basic_2syll %>% 
+plot.basic.act.after.2syll <-  bind_rows (test_act_sum_basic_2syll %>% 
                mutate (d = `1-2` - `2-3`) %>% 
                mutate (act.type = "Activation in test items"),
     test_act_sum_basic_2syll_global %>% 
@@ -1701,6 +1796,7 @@ bind_rows (test_act_sum_basic_2syll %>%
     #facet_wrap(act.type ~ ., scales = "fixed") #+
     #ggpubr::stat_pvalue_manual()
 
+plot.basic.act.after.2syll
 ```
 
 ```{r basic-experiment-global-print-difference-between-parts-of-word, results='hide'}
@@ -1724,6 +1820,68 @@ test_act_sum_basic_2syll_global %>%
 
 ```
 
+```{r basic-experiment-global-print-weights-after-2syll-plot}
+
+l.syll.pos.ind <- list(A = seq(1, N_SYLL_PER_WORD * N_WORDS, N_SYLL_PER_WORD),
+                       B = seq(2, N_SYLL_PER_WORD * N_WORDS, N_SYLL_PER_WORD),
+                       C = seq(3, N_SYLL_PER_WORD * N_WORDS, N_SYLL_PER_WORD))
+
+extract.pairwise.weights.for.flo2022 <- function(x, y){
+    
+    pmap_dfr(l.syll.pos.ind,
+             ~ data.frame(
+                 l.act = L_ACT[x],
+                 subj = x,
+                 AB = m.final.weights.basic[x, y, ..1, ..2],
+                          BC = m.final.weights.basic[x, y, ..2, ..3],
+                          AC = m.final.weights.basic[x, y, ..1, ..3])) %>%
+        colMeans()
+}
+
+expand.grid(
+    l.act = 1:length(L_ACT),
+    subj = 1:N_SIM) %>%
+    as.list %>%
+    pmap_dfr(~ extract.pairwise.weights.for.flo2022(..1, ..2)) %>%
+    dplyr::arrange(l.act, subj) %>%
+    tidyr::pivot_longer(c(AB, BC, AC),
+                        names_to = "pair",
+                        values_to = "w") %>%
+    dplyr::mutate(pair = factor(pair, levels = c("AB", "BC", "AC"))) %>% 
+    dplyr::filter(l.act >= .4) %>% 
+    ggplot(aes(x = pair, y = w)) + 
+        theme_linedraw(14) +
+    geom_violin(alpha = .5,
+                fill = "#5588CC",
+                col = "#5588CC") +
+    scale_x_discrete("Syllable pair",
+                     # labels = c("AB" = TeX("$\\sigma_1\\sigma_2$"), 
+                     #            "BC" = TeX("$\\sigma_2\\sigma_3$"), 
+                     #            "AC" = TeX("$\\sigma_1\\sigma_3$")),
+                     guide = guide_axis(angle = 60)) +
+    scale_y_continuous("Weight") +# , limits = 0:1) #+
+    stat_summary(fun.data = mean_se,
+                 geom = "pointrange", color = "#cc556f") +
+    facet_wrap(. ~ l.act, scales = "free_y") -> plot.basic.weight.in.2syll
+
+
+```
+
+```{r basic-experiment-global-print-act-after-2syll-inspect-detailed activations, eval = FALSE}
+dat.act.test.items.2syll.all.neurons %>% 
+   dplyr::group_by(l.act, test_item, item) %>% 
+    dplyr::summarize(across(matches("^n\\d+$"), mean)) %>% 
+    dplyr::select(l.act, test_item, item, n1, n2, n3)
+```
+
+```{r basic-experiment-global-print-act-and-weight-after-2syll-plot, fig.cap = "(a) Average difference in the total network activation for the first two syllables of a word (AB) and the first to syllables of a part-word (BC) after familiarization with a stream following cite{Saffran-Science}. The results reflect the network behavior after the first 50 presentations of each word. Positive values indicate greater activation for the AB items than the BC items. (b) After familiarization, the connection weight between B and C syllables is somewhat higher than that between A and B items."}
+
+grid.arrange.tag(plot.basic.act.after.2syll,
+                 plot.basic.weight.in.2syll,
+                 ncol = 2)
+
+```
+
 `r clearpage ()`
 
 ### Positional coding (NEW IN REVISION)
@@ -1736,7 +1894,7 @@ dat.all.activations.basic.m.wide <- dat.all.activations.basic %>%
     dplyr::group_modify(~ .x %>% 
                             dplyr::slice_tail(n = (N_REP_PER_WORD - N_REP_PER_WORD_BURNIN) * 
                                                   N_WORDS * N_SYLL_PER_WORD * N_NEURONS)) %>% 
-    # Now make wide
+    # Average across trials
     dplyr::group_by(l_act, subj, item, item.pos, neuron) %>% 
     dplyr::summarize(act = mean(act)) %>% 
     dplyr::ungroup() %>% 
@@ -1758,6 +1916,76 @@ if(!all(dat.all.activations.basic.m.wide %>%
 
 ```    
 
+```{r  basic-similarity-by-position-coactivations-calculate}
+# Average across subjects 
+dat.all.activations.basic.m.wide.m <- dat.all.activations.basic.m.wide  %>% 
+    dplyr::group_by(l_act, item, item.pos) %>% 
+    dplyr::summarize(across(matches("^act\\d+$"), mean)) %>% 
+    dplyr::rowwise() %>%
+    dplyr::mutate(max.neuron = which.max(c_across(matches("^act\\d+$"))), .after = "item") %>% 
+    dplyr::ungroup()
+
+
+# Make sure that the maximally active neuron matches the current item, at least for reasonable forgetting rates
+if (dat.all.activations.basic.m.wide.m %>% 
+    dplyr::filter(l_act > .4) %>% 
+    dplyr::filter(item != max.neuron) %>% 
+    nrow() > 0)
+    stop("Maximally active neuron doesn't match the current item. Have a look.")
+    
+dat.all.activations.basic.m.wide.m.by.pos <- dat.all.activations.basic.m.wide.m %>% 
+    # don't directly use the orginal long version so the same number of trials is removed as above
+    tidyr::pivot_longer(matches("^act\\d+$"),
+                        names_to = "neuron",
+                        values_to = "act") %>% 
+    dplyr::mutate(neuron = str_remove(neuron, "^act") %>% 
+                      as.numeric()) %>% 
+    # Remove activation of the current item
+    dplyr::filter(item != neuron) %>% 
+    dplyr::mutate(neuron.pos = get.pos.from.integer(neuron, N_SYLL_PER_WORD), .after = "neuron") %>% 
+    # sum the activation of neurons in the same position that are not the current item
+    dplyr::group_by(l_act, item, item.pos, neuron.pos) %>% 
+    dplyr::summarize(act = sum(act)) %>% # THIS IS A SUM NOT A MEAN!!! NOTE IN TEXT
+    # Average across items
+    dplyr::group_by(l_act, item.pos, neuron.pos) %>% 
+    dplyr::summarize(act = mean(act)) %>% 
+    dplyr::ungroup() 
+    # Make column for each neuron
+    # tidyr::pivot_wider(id_cols = c(l_act, item.pos),
+    #                    names_from = neuron.pos,
+    #                    names_prefix = "act.pos",
+    #                    values_from = act) %>% 
+    # dplyr::ungroup() %>% 
+    # dplyr::arrange(l_act, item.pos)
+```
+
+
+```{r  basic-similarity-by-position-coactivations-plot, fig.cap = "XXX"}
+    
+dat.all.activations.basic.m.wide.m.by.pos %>%     
+    dplyr::filter(l_act >= .4) %>% 
+    dplyr::mutate(across(c(item.pos, neuron.pos), factor)) %>% 
+    ggplot (aes (x = neuron.pos, y = act)) + 
+    theme_linedraw(14) + 
+    geom_violin (alpha = .5,
+                 fill = "#5588CC",
+                 col="#5588CC") +
+    scale_x_discrete(TeX ("Coactivated syllable type"),
+                     labels = ~ TeX(paste0("$\\sigma_", .x)),
+                     guide = guide_axis(angle = 0)) +
+    scale_y_continuous("Sum of activations of non-currrent syllables") +# , limits = 0:1) #+ 
+    stat_summary(fun.data=mean_se, 
+                 geom="pointrange", color="#cc556f")+
+    facet_grid(cols = vars(item.pos), 
+               rows = vars(l_act),
+               labeller = label_bquote(
+                   cols = "Current syllable type:" ~ sigma[.(item.pos)],
+                   rows = Lambda == .(l_act))) -> plot.basic.coactivations.by.pos
+
+    
+
+
+```
 
 Other investigators used electrophysiological recordings to reveal more abstract information extracted from statistically structured sequences. For example, [@Henin2021] found that, in intracranial recordings, the representations of items sharing a sequential position within words (i.e., word-initial, word-medial or word-final) were more similar than the representations of items from different positions, and concluded that this representational similarity might support positional codes. 
 
@@ -1765,7 +1993,7 @@ However, behavioral evidence suggests that such positional codes are not availab
 
 Here, I thus suggest an alternative explanation: The positional similarity might be a side effect of associative processing. Specifically, items in the same sequential position share their context. For example, all word-initial syllables are surrounded by the same set of word-final syllables and vice-versa. If so, and if the context and the focal syllables activate each other, one would expect a certain degree of representational overlap of syllables sharing a sequential position, without this necessarily having behavioral consequences.
 
-To evaluate this idea, I extracted the activation in all neurons in all time steps (after burn in). I then calculated, for each forgetting rate, simulated participant and syllable, the average activation in all neurons. I then extracted the "representation" of all syllables, that is, the vector of activations observed after a syllable has been presented. I calculated the cosine similarity across the representations of all syllable pairs (i.e., the normalized dot product), and calculated an average similarity for each forgetting rate, simulated participant and match type (positional match vs. non-match). Finally, I calculated, for each forgetting rate and simulated participant, the relative similarity difference for non-matching vs. matching pairs, $\frac{\text{non-match} - \text{match}}{\text{non-match} + \text{match}}$ and evaluated these difference scores with a Wilcoxon test against the chance level of zero.
+To evaluate this idea, I extracted the activation in all neurons in all time steps (after burn in). I then calculated, for each forgetting rate, simulated participant and syllable, the average activation in all neurons. I then extracted the "representation" of all syllables, that is, the vector of activations observed after a syllable has been presented. I calculated the cosine similarity across the representations of all syllable pairs (i.e., the normalized dot product), and calculated an average similarity for each forgetting rate, simulated participant and match type (positional match vs. non-match). Finally, I calculated, for each forgetting rate and simulated participant, the relative similarity difference for non-matching vs. matching pairs, $\frac{\text{non-match} - \text{match}}{\text{non-match} + \text{match}}$ and evaluated these difference scores with a Wilcoxon test against the chance level of zero. 
 
 
 ```{r basic-similarity-by-position-make-similarity}    
@@ -1845,7 +2073,7 @@ dat.similarity.activations.basic.m.d <- dat.similarity.activations.basic %>%
 
 ```
 
-```{r basic-similarity-by-position-plot-difference, fig.cap = "Simulations of positional codes cite{Henin2021}. Representations of syllables *not* sharing a sequential position (i.e., word-initial, word-medial, word-final) are more similar to each other than representations of syllables sharing a sequential position. The similarity was evaluated using the cosine similarity across the vectors of activation elicited by the syllables."}
+```{r basic-similarity-by-position-plot-difference, fig.height=9, fig.cap = "Simulations of positional codes cite{Henin2021}. Representations of syllables *not* sharing a sequential position (i.e., word-initial, word-medial, word-final) are more similar to each other than representations of syllables sharing a sequential position. The similarity was evaluated using the cosine similarity across the vectors of activation elicited by the syllables."}
 
 dat.similarity.activations.basic.m.d %>% 
     dplyr::filter(l_act >= .4) %>% 
@@ -1860,9 +2088,17 @@ dat.similarity.activations.basic.m.d %>%
                      guide = guide_axis(angle = 60)) +
     scale_y_continuous(TeX("$\\frac{Non-match - Match}{Non-match + Match}$")) +# , limits = 0:1) #+ 
     stat_summary(fun.data=mean_se, 
-                 geom="pointrange", color="#cc556f")
+                 geom="pointrange", color="#cc556f") -> plot.basic.similarity.activations
 
 ```    
+
+```{r basic-similarity-by-position-plot-difference-and-coactivation, fig.width = 13.5, fig.height = 7, fig.cap = "(a) Simulations of positional codes cite{Henin2021}. Representations of syllables *not* sharing a sequential position (i.e., word-initial, word-medial, word-final) are more similar to each other than representations of syllables sharing a sequential position. The similarity was evaluated using the cosine similarity across the vectors of activation elicited by the syllables. (b) Sum of co-activations during presentations of word-initial, -medial and -final syllables (columns) of syllables in different sequential positions (x-axis), for different forgetting rates (rows). Most concurrently activated syllables occupy a different sequential position than the currently presented syllable."}
+
+grid.arrange.tag(plot.basic.similarity.activations,
+                 plot.basic.coactivations.by.pos,
+                 ncol = 2)
+
+```
         
 ```{r basic-similarity-by-position-print-difference, results = 'hide'}
 dat.similarity.activations.basic.m.d %>% 
@@ -1888,7 +2124,11 @@ dat.similarity.activations.basic.m.d %>%
 
 
 
-As shown in Figure \ref{fig:basic-similarity-by-position-plot-difference} and Table \ref{tab:basic-similarity-by-position-print-difference2}, the similarity score for non-match pairs was significantly higher than for match pairs for all forgetting rates. The reason for the inversion of the sign of the difference with respect to [@Henin2021] is presumably the time course in the current model vs. in actual biological tissue. In the current simulations, a syllable duration is a discrete time-step. The activations reported here are thus snapshots of more continuously evolving activations. As a result, the representations of, say, word-initial and word-final syllables overlap, given that these syllables excite each other in the same time step. In contrast, given the localist coding scheme used here, there is no overlap in the representations of syllables occupying the same sequential position.
+As shown in Figure \ref{fig:basic-similarity-by-position-plot-difference-and-coactivation}a and Table \ref{tab:basic-similarity-by-position-print-difference2}, the similarity score for non-match pairs was significantly higher than for match pairs for all forgetting rates. As mentioned above, the reason for this result is likely the types of syllables that are co-activated. 
+
+To illustrate this idea, I summed the activations of all other syllables while a focal syllable was presented. For example, while the word-initial syllable *A* was presented, I separately summed the activations of all other word-initial syllables (excluding *A* itself), all word-medial syllables, and all word-final syllables, and averaged these sums for all (word-initial, word-medial or word-final) syllable types. As shown in Figure \ref{fig:basic-similarity-by-position-plot-difference-and-coactivation}b, there was little co-activation between syllables of the same type. In contrast, during presentation of word-initial syllables, word-final syllables were fairly active; during presentation of word-medial syllables, word-initial syllables were relatively active, while word-final syllables were co-activated with word-medial syllables. In other words, the positional similarity in syllable representations is due to the context in which these syllables occur, and not due to positional codes. 
+
+The reason for the inversion of the sign of the difference with respect to [@Henin2021] is presumably the time course in the current model vs. in actual biological tissue. In the current simulations, a syllable duration is a discrete time-step. The activations reported here are thus snapshots of more continuously evolving activations. As a result, the representations of, say, word-initial and word-final syllables overlap, given that these syllables excite each other in the same time step. In contrast, given the localist coding scheme used here, there is no overlap in the representations of syllables occupying the same sequential position.
 
 In contrast, with realistic activation time courses, the time-resolved similarity measures used by [@Henin2021] can capture the actual time course of the associative activation. For example, upon presentation of a word-initial syllable, such measures can capture any lingering activation of the representations of the previous word-final syllable as well as its reactivation through excitation from the word-initial syllable. I surmise that these time series make the same same-position representations more similar. Be that as it might, the current model can differentiate between different sequential positions.
 
