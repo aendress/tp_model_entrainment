@@ -1902,6 +1902,8 @@ grid.arrange.tag(plot.basic.act.after.2syll,
 ```{r basic-similarity-by-position-make-average-activations}
 
 # Make average activation for each forgetting rate, subject, item, and neuron
+# dat.all.activations.basic columns: "l_act"    "subj"     "item"     "item.pos" "act"      "neuron" 
+
 dat.all.activations.basic.m.wide <- dat.all.activations.basic %>% 
     # Remove burnin
     dplyr::group_by(l_act, subj) %>% 
@@ -1931,11 +1933,17 @@ if(!all(dat.all.activations.basic.m.wide %>%
 ```    
 
 ```{r  basic-similarity-by-position-coactivations-calculate}
-# Average across subjects 
+
+# This calculates the total activation in neurons representing a position when a given item is presented
+# This does NOT calculate the similarity
+
+
+# Average across subjects, but keep items 
 dat.all.activations.basic.m.wide.m <- dat.all.activations.basic.m.wide  %>% 
     dplyr::group_by(l_act, item, item.pos) %>% 
     dplyr::summarize(across(matches("^act\\d+$"), mean)) %>% 
     dplyr::rowwise() %>%
+    # Detect winning neuron
     dplyr::mutate(max.neuron = which.max(c_across(matches("^act\\d+$"))), .after = "item") %>% 
     dplyr::ungroup()
 
@@ -1948,7 +1956,7 @@ if (dat.all.activations.basic.m.wide.m %>%
     stop("Maximally active neuron doesn't match the current item. Have a look.")
     
 dat.all.activations.basic.m.wide.m.by.pos <- dat.all.activations.basic.m.wide.m %>% 
-    # don't directly use the orginal long version so the same number of trials is removed as above
+    # don't directly use the original long version so the same number of trials is removed as above
     tidyr::pivot_longer(matches("^act\\d+$"),
                         names_to = "neuron",
                         values_to = "act") %>% 
@@ -1975,7 +1983,7 @@ dat.all.activations.basic.m.wide.m.by.pos <- dat.all.activations.basic.m.wide.m 
 
 
 ```{r  basic-similarity-by-position-coactivations-plot, fig.cap = "XXX"}
-    
+
 dat.all.activations.basic.m.wide.m.by.pos %>%     
     dplyr::filter(l_act >= .4) %>% 
     dplyr::mutate(across(c(item.pos, neuron.pos), factor)) %>% 
@@ -1985,12 +1993,12 @@ dat.all.activations.basic.m.wide.m.by.pos %>%
     geom_violin (alpha = .5,
                  fill = "#5588CC",
                  col="#5588CC") +
-    scale_x_discrete(TeX ("Coactivated syllable type"),
-                     labels = ~ TeX(paste0("$\\sigma_", .x)),
+    scale_x_discrete(latex2exp::TeX ("Coactivated syllable type"),
+                     labels = ~ latex2exp::TeX(paste0("$\\sigma_", .x)),
                      guide = guide_axis(angle = 0)) +
     scale_y_continuous("Sum of activations of non-currrent syllables") +# , limits = 0:1) #+ 
-    stat_summary(fun.data=mean_se, 
-                 geom="pointrange", color="#cc556f")+
+    stat_summary(fun.data = mean_se, 
+                 geom = "pointrange", color = "#cc556f")+
     facet_grid(cols = vars(item.pos), 
                rows = vars(l_act),
                labeller = label_bquote(
@@ -2076,7 +2084,7 @@ dat.similarity.activations.basic <- dat.all.activations.basic.m.wide %>%
 dat.similarity.activations.basic.m.d <- dat.similarity.activations.basic %>% 
     # Average across pairs
     dplyr::group_by(l_act, subj, pos.match) %>% 
-    dplyr::summarize(cosine = mean (cosine)) %>% 
+    dplyr::summarize(cosine = mean(cosine)) %>% 
     tidyr::pivot_wider(id_cols = c(l_act, subj),
                 names_from = pos.match,
                 values_from = cosine) %>%
